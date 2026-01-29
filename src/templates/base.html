@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}G-BASE{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'app.css' %}">
+</head>
+<body>
+
+{% include "components/header.html" %}
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+{% include "components/nav.html" %}
+
+</body>
+</html>
