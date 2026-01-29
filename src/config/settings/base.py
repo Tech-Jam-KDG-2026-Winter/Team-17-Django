@@ -1,14 +1,30 @@
+# src/config/settings/base.py
 from pathlib import Path
+import os
 
-# config/settings/base.py
-# BASE_DIR は manage.py があるディレクトリを指すのが都合が良い
-BASE_DIR = Path(__file__).resolve().parents[3]
+# base.py の位置: src/config/settings/base.py
+# parents[0]=settings, [1]=config, [2]=src, [3]=repo_root(…/move-mate)
+# 「manage.py がある src/」を BASE_DIR にしたいので parents[2] を採用する
+BASE_DIR = Path(__file__).resolve().parents[2]  # => src/
 
-SECRET_KEY = "django-insecure-x!e8w94#_z0x*10ek4f^v2*19%1hs167aj8!57htfo@mxalpeg"
-DEBUG = True
-ALLOWED_HOSTS = []
+# --------------------------------------------------------------------
+# Security / Env
+# --------------------------------------------------------------------
+# .env は基本的にローカル専用。Git には載せない前提。
+# ここでは「読み込み自体」は別途（python-dotenv等）に委ね、
+# settings は環境変数が来る前提で書く（CI/CDでも使いやすい）。
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-only-secret-key")
+DEBUG = os.getenv("DJANGO_DEBUG", "true").lower() == "true"
 
+# 本番は環境変数で "example.com,api.example.com" のように渡す想定
+_raw_hosts = os.getenv("DJANGO_ALLOWED_HOSTS", "")
+ALLOWED_HOSTS = [] if DEBUG else [h.strip() for h in _raw_hosts.split(",") if h.strip()]
+
+# --------------------------------------------------------------------
+# Application definition
+# --------------------------------------------------------------------
 INSTALLED_APPS = [
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -16,8 +32,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # starter apps
-    "apps.common",
+    # Project apps (src/apps/ 配下)
+    "apps.accounts",
+    "apps.teams",
+    "apps.quests",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [
@@ -32,11 +51,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
+# --------------------------------------------------------------------
+# Templates
+# --------------------------------------------------------------------
+# あなたの構造は src/templates/ を利用する前提なので DIRS に追加が必須
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
+        "DIRS": [BASE_DIR / "templates"],  # src/templates
+        "APP_DIRS": True,                 # apps/*/templates も拾える（将来の拡張もOK）
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
@@ -50,6 +73,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
+# --------------------------------------------------------------------
+# Database
+# --------------------------------------------------------------------
+# あなたの構造では src/db.sqlite3
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -57,6 +84,9 @@ DATABASES = {
     }
 }
 
+# --------------------------------------------------------------------
+# Password validation
+# --------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -64,12 +94,26 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# チーム開発ならここは日本に寄せておくのが事故りにくい
+# --------------------------------------------------------------------
+# i18n / timezone
+# --------------------------------------------------------------------
 LANGUAGE_CODE = "ja"
 TIME_ZONE = "Asia/Tokyo"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+# --------------------------------------------------------------------
+# Static / Media
+# --------------------------------------------------------------------
+# あなたの構造では src/static/ と src/media/
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]  # src/static
 
+# media は「将来使うために置いてある」でも、設定だけ入れておくのは害がない
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"  # src/media
+
+# --------------------------------------------------------------------
+# Defaults
+# --------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

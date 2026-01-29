@@ -1,10 +1,14 @@
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
-from apps.common.api.health import healthz
 
+# src/config/urls.py
 def root(request):
     return JsonResponse({"service": "django-starter", "status": "ok"})
+
+# 起動確認のため
+def healthz(request):
+    return JsonResponse({"status": "ok"})
 
 urlpatterns = [
     path("",root),
