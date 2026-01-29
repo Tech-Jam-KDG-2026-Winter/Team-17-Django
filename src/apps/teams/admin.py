@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from .models import Team, TeamInvite, TeamMember
 
+# @admin.registerはadminのみが管理者画面に入れるという意味。
+
 # teamの新規登録
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):

@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 
 from .models import User
 
+# @admin.registerはadminのみが管理者画面に入れるという意味。
 
 @admin.register(User)
 class UserAdmin(DjangoUserAdmin):

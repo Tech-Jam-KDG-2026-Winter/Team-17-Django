@@ -29,6 +29,43 @@ class JoinResult:
     team: Team
     membership: TeamMember
 
+# -----------------------------
+# Rank calculation (teams側の確定値)
+# -----------------------------
+# NOTE:
+# - ランクは「累積ポイント total_points」から決まる“表示用スナップショット”
+# - しきい値は MVP 仕様に合わせて固定
+#
+# 仕様（ユーザー提示）:
+# F → E: 100
+# E → D: 300
+# D → C: 600
+# C → B: 1100 (600 + 500)
+# 以降 +500 ずつ加算（今回はMVPなので S までの代表値のみ用意）
+RANK_THRESHOLDS = [
+    ("F", 0),
+    ("E", 100),
+    ("D", 300),
+    ("C", 600),
+    ("B", 1100),
+    ("A", 1600),
+    ("S", 2100),
+]
+
+def calc_rank(total_points: int) -> str:
+    """
+    total_points から現在ランクを返す。
+    NOTE: MVPではS以降を想定しないので、上限はSで固定。
+    """
+    if total_points is None:
+        total_points = 0
+
+    rank = "F"
+    for r, threshold in RANK_THRESHOLDS:
+        if total_points >= threshold:
+            rank = r
+    return rank
+
 
 class TeamService:
     """
@@ -38,6 +75,7 @@ class TeamService:
     - Team / TeamMember / TeamInvite を直接更新せず、必ずこのサービス経由で操作する
     - member_count はキャッシュ値。TeamMember の増減と必ず同一トランザクションで整合を取る
     - 同時参加（競合）を考慮し、Team 行をロックして定員超過を防ぐ
+    - total_points / rank もキャッシュ値（表示用の確定値）として team に持つ
     """
 
     # -----------------------------
@@ -74,6 +112,8 @@ class TeamService:
             owner=owner,  # 実行時は CustomUser インスタンス
             max_members=max_members,
             member_count=1,
+            total_points=0,
+            rank="F",
         )
 
         # owner を所属させる（ここが MVP の前提）
@@ -146,6 +186,46 @@ class TeamService:
         return JoinResult(team=team, membership=membership)
 
     # -----------------------------
+    # Team points / rank (quests未整備でも作れる “受け皿”)
+    # -----------------------------
+    @transaction.atomic
+    def add_points(self, *, team_id: int, delta: int, actor: "AbstractUser" | None = None, reason: str = "") -> Team:
+        """
+        チームの合計ポイントを加算し、ランクを更新する。
+
+        方針:
+        - 「ptが生まれる」のは quests 側だが、teams は “保持” を担当する
+        - quests 完了処理からこのメソッドを呼ぶだけで良いようにしておく（後から差し替え可能）
+
+        Args:
+            team_id: 加算対象チーム
+            delta: 加算ポイント（正の整数）
+            actor: 将来監査ログを作るための引数（MVPでは未使用でもOK）
+            reason: 将来監査ログを作るための引数（MVPでは未使用でもOK）
+        """
+        if delta <= 0:
+            raise ValidationError({"points": "加算ポイントは正の値である必要があります"})
+
+        team = Team.objects.select_for_update().get(id=team_id)
+
+        team.total_points += int(delta)
+        team.rank = calc_rank(team.total_points)
+
+        team.save(update_fields=["total_points", "rank", "updated_at"])
+        return team
+    
+    @transaction.atomic
+    def recount_rank(self, *, team_id: int) -> Team:
+        """
+        total_points から rank を再計算して保存する（保守用）。
+        """
+        team = Team.objects.select_for_update().get(id=team_id)
+        team.rank = calc_rank(team.total_points)
+        team.save(update_fields=["rank", "updated_at"])
+        return team
+
+
+    # -----------------------------
     # Invite management
     # -----------------------------
     @transaction.atomic
@@ -183,6 +263,7 @@ class TeamService:
         - owner のみ
         """
         team = Team.objects.select_for_update().get(id=team_id)
+        
         if team.owner_id != actor.id:
             raise ValidationError({"permission": "招待コードの無効化はチーム作成者のみ可能です"})
 

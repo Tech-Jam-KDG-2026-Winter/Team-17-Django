@@ -2,25 +2,30 @@
 from __future__ import annotations
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
 
 class QuestDifficulty(models.TextChoices):
-    # 表示も英語に統一（アプリコンセプト優先）
+    # DB値は英語（easy/normal/hard）。表示ラベルも英語に統一。
     EASY = "easy", "Easy"
-    MEDIUM = "medium", "Medium"
+    MEDIUM = "normal", "Normal"
     HARD = "hard", "Hard"
 
 
 class QuestCategory(models.TextChoices):
+    # DB値は英語（stretch/muscle）。表示ラベルも英語に統一。
     STRETCH = "stretch", "Stretch"
     MUSCLE = "muscle", "Muscle"
 
 
-class DailyGeneratedBy(models.TextChoices):
-    LOGIC = "logic", "Logic"
-    AI = "ai", "AI"
+# MVP仕様の固定ポイント
+DEFAULT_POINTS_BY_DIFFICULTY: dict[str, int] = {
+    QuestDifficulty.EASY: 10,
+    QuestDifficulty.MEDIUM: 40,
+    QuestDifficulty.HARD: 100,
+}
 
 
 class Quest(models.Model):
@@ -30,17 +35,21 @@ class Quest(models.Model):
     NOTE:
     - 「AI提案」は Quest を生成するのではなく、Quest を "選ぶ"。
     - よって Quest は固定データとして綺麗に正規化しておくと勝てる。
+
+    MVP仕様:
+    - points は difficulty と整合している必要がある（事故防止）
+    easy=10 / medium=40 / hard=100
     """
 
     name = models.CharField(max_length=100)
     difficulty = models.CharField(max_length=10, choices=QuestDifficulty.choices)
     category = models.CharField(max_length=10, choices=QuestCategory.choices)
 
-    # 「一目で理解できる種目が嬉しい」→ description に回数/秒も入れる
+    # 「一目で理解できる種目が嬉しい」→ 回数/秒などもここへ
     description = models.TextField(blank=True)
 
-    # ポイントは難易度から算出でも良いが、将来の調整が楽なのでDBに持つ
-    points = models.PositiveIntegerField(default=10)
+    # 将来調整の余地は残すが、MVPでは difficulty と一致させる（cleanでガード）
+    points = models.PositiveIntegerField()
 
     is_active = models.BooleanField(default=True)
 
@@ -53,6 +62,20 @@ class Quest(models.Model):
             models.Index(fields=["difficulty", "category", "is_active"]),
         ]
 
+    def clean(self):
+        """
+        MVPのバグ源を潰す（seed/管理画面/将来の手修正で points が壊れがち）。
+
+        方針:
+        - difficulty が決まっているなら points は固定値に一致させる
+        - Hackathon中の「表示と加算がズレる」を物理的に防ぐ
+        """
+        expected = DEFAULT_POINTS_BY_DIFFICULTY.get(self.difficulty)
+        if expected is not None and self.points != expected:
+            raise ValidationError(
+                {"points": f"points must be {expected} when difficulty='{self.difficulty}' (G-BASE MVP rule)"}
+            )
+
     def __str__(self) -> str:
         return f"{self.name} ({self.difficulty}/{self.category})"
 
@@ -62,7 +85,8 @@ class DailyQuestSet(models.Model):
     「今日チームに提示された4つ」を固定する箱。
 
     NOTE:
-    - ここが無いと、"達成" 押した瞬間におすすめが変わったりして信用が壊れる。
+    - ここが無いと、"達成" 押した瞬間におすすめが変わる等で信用が壊れる。
+    - 生成ロジック（疑似AI/AI）は service 層に隔離する。
     """
 
     team = models.ForeignKey(
@@ -71,14 +95,14 @@ class DailyQuestSet(models.Model):
         related_name="daily_sets",
     )
 
-    # チームのローカル日付（TIME_ZONE=Asia/Tokyo を前提に timezone.localdate()）
+    # JST想定なら localdate を使う（呼び出し側で date を渡し忘れる事故を防ぐ）
     date = models.DateField(default=timezone.localdate)
 
     # 今日の難易度（チームポイント/ランクなどから決定）
     difficulty = models.CharField(max_length=10, choices=QuestDifficulty.choices)
 
     # 発表映え用: "logic" or "ai"（AIをOFFにしても成立する）
-    generated_by = models.CharField(max_length=10, choices=DailyGeneratedBy.choices, default=DailyGeneratedBy.LOGIC)
+    generated_by = models.CharField(max_length=10, default="logic")
 
     created_at = models.DateTimeField(default=timezone.now)
 
@@ -129,11 +153,16 @@ class DailyQuestItem(models.Model):
 
 class QuestCompletion(models.Model):
     """
-    ユーザーが「達成」ボタンを押したログ。
+    ユーザーが「Completed? Yes」を選んだログ。
 
     NOTE:
     - 1ユーザーが同じDailyQuestItemを複数回達成できないよう UniqueConstraint。
-    - チーム合計ポイント加算/ランク更新はサービス層で transaction で行うのが安全。
+    - チーム合計ポイント加算/ランク更新/MVP判定/通知作成は service 層で transaction で行うのが安全。
+
+    追加要件との整合:
+    - 星表示: DailyQuestItem.completions.count() で達成人数が取れる
+    - MVP判定: userごとの points 合計は quest.points を join して集計できる
+    同点なら「最も早い completed_at（min）」で勝者を決められる
     """
 
     daily_item = models.ForeignKey(
