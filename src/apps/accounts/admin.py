@@ -12,7 +12,6 @@ class UserAdmin(DjangoUserAdmin):
 
     NOTE:
     - 一般ユーザーは基本ここを触らない
-    - Hackathonでは「状態確認できる」ことを最優先
     """
 
     model = User

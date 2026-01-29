@@ -32,11 +32,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Project apps (src/apps/ 配下)
+    # Project apps (src/apps/ 配下の各ディレクトリ apps.pyでの記述 [例]：src/apps/teams/app.py)
     "apps.accounts.apps.AccountsConfig",
-    "apps.teams",
-    "apps.quests",
-    "apps.notifications",
+    "apps.teams.apps.TeamsConfig",        
+    "apps.quests.apps.QuestsConfig",
+    "apps.notifications.apps.NotificationsConfig",
 ]
 
 # --------------------------------------------------------------------
