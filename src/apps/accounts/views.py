@@ -1,8 +1,16 @@
 # src/apps/accounts/views.py
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render, redirect
+from django.db import IntegrityError
 
+from .forms import LoginForm, SignupForm
+from .models import User
+
+@require_http_methods(["GET", "POST"])
 def login_view(request):
+
     """
     ログイン（email + password）
 
@@ -16,7 +24,22 @@ def login_view(request):
     # - from django.contrib.auth import authenticate, login
     # - GET: form表示 / POST: form検証→authenticate→login→redirect
     """
-    pass
+    form = LoginForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        email = form.cleaned_data["email"]
+        password = form.cleaned_data["password"]
+
+        # USERNAME_FIELD = "email" のため username=email
+        user = authenticate(request, username=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect("/")
+        else:
+            form.add_error(None, "メールアドレスまたはパスワードが正しくありません")
+
+    return render(request, "auth/login.html", {"form": form})
 
 def signup_view(request):
     """
@@ -33,7 +56,27 @@ def signup_view(request):
     # - User.objects.create_user(...)
     # - login(request, user)
     """
-    pass
+    form = SignupForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        email = form.cleaned_data["email"]
+        display_name = form.cleaned_data["display_name"]
+        password = form.cleaned_data["password1"]
+
+        try:
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                display_name=display_name,
+            )
+        except IntegrityError:
+            # unique 制約（email重複）に対応
+            form.add_error("email", "このメールアドレスは既に登録されています")
+        else:
+            login(request, user)
+            return redirect("/")
+        
+    return render(request, "auth/signup.html", {"form": form})
 
 @login_required
 @require_POST
@@ -55,4 +98,5 @@ def logout_view(request):
     # - logout(request)
     # - redirect(LOGOUT_REDIRECT_URL)
     """
-    pass
+    logout(request)
+    return redirect("accounts:login")
