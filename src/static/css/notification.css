@@ -1,0 +1,58 @@
+/* ===== Notifications List ===== */
+
+.notifications-section {
+	color: #ffffff;
+}
+
+/* 1件分 */
+.notification-item {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 16px;
+	border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 最下部の線を再現したい場合 */
+.notification-item:last-child {
+	border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* アイコン共通 */
+.notification-icon {
+	width: 26px;
+	height: 26px;
+	flex-shrink: 0;
+	background-color: #e6f26a;
+	mask-size: contain;
+	mask-repeat: no-repeat;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+}
+
+/* トロフィー */
+.notification-icon.trophy {
+	mask-image: url("/static/icons/trophy.svg");
+	-webkit-mask-image: url("/static/icons/trophy.svg");
+}
+
+/* 握手 */
+.notification-icon.handshake {
+	mask-image: url("/static/icons/handshake.svg");
+	-webkit-mask-image: url("/static/icons/handshake.svg");
+}
+
+/* メダル */
+.notification-icon.medal {
+	mask-image: url("/static/icons/medal.svg");
+	-webkit-mask-image: url("/static/icons/medal.svg");
+}
+
+/* テキスト */
+.notification-text {
+	font-size: 15px;
+	font-weight: bold;
+	line-height: 1.4;
+}

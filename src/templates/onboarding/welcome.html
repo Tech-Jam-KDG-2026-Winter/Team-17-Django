@@ -1,0 +1,36 @@
+{% load static %}
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>G-BASE Welcome</title>
+		<link rel="stylesheet" href="{% static 'css/welcome.css' %}" />
+	</head>
+	<body>
+		<div class="deco deco-top"></div>
+		<div class="deco deco-top-small"></div>
+		<div class="deco deco-bottom"></div>
+		<div class="deco deco-bottom-small"></div>
+
+		<div class="welcome-container">
+			<div class="logo-section">
+				<div class="pentagon-main"></div>
+				<div class="brand-name">G-BASE</div>
+			</div>
+
+			<h1 class="welcome-text">へようこそ！</h1>
+
+			<div class="intro-text-box">
+				<p>導入テキスト導入テキスト</p>
+				<p>導入テキスト導入テキスト</p>
+				<p>導入テキスト導入テキスト</p>
+				<p>導入テキスト導入テキスト</p>
+			</div>
+
+			<div class="action-area">
+				<a href="{% url 'login' %}" class="btn-start">START</a>
+			</div>
+		</div>
+	</body>
+</html>

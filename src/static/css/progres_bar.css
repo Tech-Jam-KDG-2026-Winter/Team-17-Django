@@ -1,0 +1,124 @@
+/* ===== Progress Bar Section ===== */
+
+.progress-section {
+	padding: 16px;
+	color: #ffffff;
+}
+
+/* チーム名 */
+.team-title {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 22px;
+	font-weight: bold;
+	margin-bottom: 16px;
+}
+
+.team-icon {
+	width: 20px;
+	height: 20px;
+	border: 2px solid #ffffff;
+	clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+/* メイン横並び */
+.progress-area {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+/* ===== 円形プログレス ===== */
+
+.progress-bar {
+	position: relative;
+	width: 96px;
+	height: 96px;
+	flex-shrink: 0;
+}
+
+.progress-svg {
+	width: 96px;
+	height: 96px;
+	transform: rotate(-90deg);
+}
+
+.progress-bg {
+	fill: none;
+	stroke: rgba(255, 255, 255, 0.15);
+	stroke-width: 10;
+}
+
+.progress-ring {
+	fill: none;
+	stroke: #7ef0a0;
+	stroke-width: 10;
+	stroke-linecap: round;
+
+	/* 2πr = 約264 */
+	stroke-dasharray: 264;
+	stroke-dashoffset: 66; /* 75%進捗 */
+}
+
+/* 中央表示 */
+.progress-center {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.rank {
+	font-size: 28px;
+	font-weight: bold;
+	line-height: 1;
+}
+
+.points {
+	font-size: 11px;
+	margin-top: 4px;
+}
+
+.points .current {
+	color: #ff6b6b;
+}
+
+/* ===== 右側情報 ===== */
+
+.progress-info {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.info-title {
+	font-size: 14px;
+	margin-bottom: 4px;
+}
+
+/* 星 */
+.stars {
+	display: flex;
+	gap: 4px;
+}
+
+.star {
+	font-size: 18px;
+	color: rgba(255, 255, 255, 0.3);
+}
+
+.star.active {
+	color: #ffe66d;
+}
+
+/* MVP */
+.mvp-name {
+	background-color: #3a4658;
+	padding: 8px 14px;
+	font-weight: bold;
+	text-align: center;
+	font-size: 14px;
+}
