@@ -23,10 +23,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.views.decorators.http import require_POST
 
-from typing import Union,Optional
+from typing import Optional
 
 from .models import Team
 from .services import TeamService
+from django.shortcuts import get_object_or_404
+
 
 service=TeamService()
 
@@ -35,7 +37,7 @@ service=TeamService()
 # -----------------------------
 
 
-def _get_my_team_id_or_none(user) -> Union[int, None]:
+def _get_my_team_id_or_none(user) -> Optional[int]:
 
     """
     自分の所属チームIDを返す（未所属なら None）
@@ -57,6 +59,19 @@ def _redirect_to_team_entry(request, reason: Optional[str]=None):
     if reason:
         messages.info(request, reason)  # ← 注意: messages は request が必要。各viewで呼ぶ設計でもOK。
     return redirect("teams:join")
+
+
+def _validation_error_to_message(e: ValidationError) -> str:
+    # dict形式でもlist形式でも安定して人間向けメッセージにする
+    if hasattr(e, "message_dict"):
+        parts = []
+        for field, msgs in e.message_dict.items():
+            for m in msgs:
+                parts.append(f"{field}: {m}" if field != "__all__" else str(m))
+        return "\n".join(parts) if parts else "入力内容を確認してください"
+    if hasattr(e, "messages") and e.messages:
+        return "\n".join(e.messages)
+    return str(e)
 
 
 #----------
@@ -97,17 +112,25 @@ def team_create_view(request):
         return redirect("teams:detail",team_id=my_team_id)
     
     if request.method=="POST":
-        name=request.POST.get("name")
+        name=request.POST.get("name","")
+        max_members_raw=request.POST.get("max_members","")  # 任意（フォームがあれば）
+        max_members=5
+        if max_members_raw:
+            try:
+                max_members=int(max_members_raw)
+            except ValueError:
+                messages.error(request,"max_membersは数値で入力してください。")
+                return render(request,"onboarding/team_create.html")
+
         try:
-            team=service.create_team(owner=request.user,name=name)
-            messages.success(request,f"チーム「{team.name}」を作成しました！")
-            return redirect("teams:detail",team_id=team.id)
+            team = service.create_team(owner=request.user, name=name, max_members=max_members)
+            messages.success(request, f"チーム「{team.name}」を作成しました！")
+            return redirect("teams:detail", team_id=team.id)
         except ValidationError as e:
-            # 辞書形式のエラーメッセージにも対応
-            msg = e.message_dict.get('__all__', [e.message])[0] if hasattr(e, 'message_dict') else e.message
-            messages.error(request,msg)
+            messages.error(request, _validation_error_to_message(e))
 
     return render(request, "onboarding/team_create.html")
+
 
 @login_required
 def team_join_view(request):
@@ -143,17 +166,15 @@ def team_join_view(request):
         return redirect("teams:detail",team_id=my_team_id)
     
     if request.method == "POST":
-        code=request.POST.get("code")
+        code=request.POST.get("code","")
         try:
-            # Service を利用して参加
             result = service.join_team_by_code(user=request.user,code=code)
             messages.success(request,f"チーム「{result.team.name}」を参加しました！")
             return redirect("teams:detail",team_id=result.team.id)
         except ValidationError as e:
-            msg = e.message_dict.get('__all__', [e.message])[0] if hasattr(e, 'message_dict') else e.message
-            messages.error(request,msg)
+            messages.error(request, _validation_error_to_message(e))
 
-    # return render(request,"onboarding/team_join.html")
+    return render(request,"onboarding/team_join.html")
 
 @login_required
 def team_detail_view(request, team_id: int):
@@ -191,10 +212,19 @@ def team_detail_view(request, team_id: int):
         messages.error(request,f"他のチームの情報は閲覧できません。")
         return redirect("teams:detail",team_id=my_team_id)
 
-    from django.shortcuts import get_object_or_404
     team=get_object_or_404(Team,id=team_id)
 
-    # return render(request,"teams/detail.html",{"team":team})
+    # 必要ならメンバー一覧もここで取る（readなのでOKとするなら）
+    members=team.memberships.select_related("user").order_by("joined_at")
+    return render(
+        request,
+        "teams/detail.html",
+        {
+            "team":team,
+            "members":members,
+            "invite":getattr(team,"invite",None)  # OneToOneなので無い場合がある
+        }
+    )
 
 @login_required
 @require_POST
@@ -220,14 +250,20 @@ def invite_regenerate_view(request, team_id: int):
     # - service.regenerate_invite(...)
     # - messages.success / messages.error
     """
+    my_team_id = _get_my_team_id_or_none(request.user)
+    if my_team_id is None:
+        return _redirect_to_team_entry(request, "チームに所属していません。")
+    if my_team_id != team_id:
+        messages.error(request, "他のチーム操作はできません。")
+        return redirect("teams:detail", team_id=my_team_id)
+
     try:
-        service.regenerate_invite(team_id=team_id,actor=request.user)
-        messages.success(request,"招待コードを生成しました。")
+        service.regenerate_invite(team_id=team_id, actor=request.user)
+        messages.success(request, "招待コードを再生成しました。")
     except ValidationError as e:
-        messages.error(request,e.message)
-    except Exception:
-        messages.error(request,"再生成に失敗しました。")
-    return redirect("teams:detail",team_id=team_id)
+        messages.error(request, _validation_error_to_message(e))
+
+    return redirect("teams:detail", team_id=team_id)
 
 @login_required
 @require_POST
@@ -249,9 +285,16 @@ def invite_deactivate_view(request, team_id: int):
     # TODO:
     # - service.deactivate_invite(...)
     """
+    my_team_id=_get_my_team_id_or_none(request.user)
+    if my_team_id is None:
+        return _redirect_to_team_entry(request,"チームに所属していません。")
+    if my_team_id != team_id:
+        messages.error(request,"他チームの操作はできません。")
+        return redirect("teams:detail", team_id=my_team_id)
+
     try:
         service.deactivate_invite(team_id=team_id,actor=request.user)
         messages.success(request,"招待コードを無効化しました。")
     except ValidationError as e:
-        messages.error(request,e.message)
+        messages.error(request, _validation_error_to_message(e))
     return redirect("teams:detail",team_id=team_id)
