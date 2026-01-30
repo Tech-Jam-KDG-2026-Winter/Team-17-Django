@@ -27,6 +27,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
+from apps.teams.models import Team
+from .services import QuestService
+
+service=QuestService()
 
 # TODO(後輩):
 # - Team の参照（※更新はしない）
@@ -91,6 +95,8 @@ def _flash_validation_error(request, e: ValidationError, fallback: str):
             msg = next(iter(e.message_dict.values()))[0]
         except Exception:
             msg = fallback
+    elif hasattr(e,"messages"):
+        msg=e.messages[0]
     messages.error(request, msg)
 
 
@@ -137,7 +143,18 @@ def today_view(request):
         #     "generated_by": result.generated_by, # "logic"/"ai"
         # }
         # return render(request, "quests/today.html", context)
-        pass
+        team=Team.objects.get(id=my_team_id)
+        result=service.get_or_create_today_set(team=team,user=request.user)
+
+        context={
+            "team":team,
+            "daily_set":result.daily_set,
+            "items":result.items,
+            "difficulty":result.difficulty,
+            "generated_by":result.generated_by,
+        }
+        return render(request,"quests/today.html",context)
+    # 後でコメントアウトする↑
 
     except ValidationError as e:
         # 代表例:
@@ -187,7 +204,17 @@ def complete_view(request, daily_item_id: int):
         #     messages.info(request, "このクエストは達成済みです。")
         #
         # return redirect("quests:today")
-        pass
+        result=service.complete(user=request.user,daily_item_id=daily_item_id)
+
+        if result.gained_points > 0:
+            messages.success(request,f"Quest Clear! +{result.gained_points}pt")
+            # ランクアップが有れば通知
+            if result.rank_before != result.rank_after:
+                messages.info(request,f"Team Rank Up! {result.rank_before}→{result.rank_after}")
+        else:
+            messages.info(request,"このクエストは達成済みです。")
+        return redirect("quests:today")
+
 
     except ValidationError as e:
         _flash_validation_error(request, e, "達成できませんでした。")
@@ -232,7 +259,16 @@ def progress_view(request):
         #     "progress_items": progress.items,  # ProgressItem の配列
         # }
         # return render(request, "quests/progress.html", context)
-        pass
+        team=Team.objects.get(id=my_team_id)
+        progress=service.get_today_progress(team=team,user=request.user)
+
+        context={
+            "team":team,
+            "daily_set":progress.daily_set,
+            "progress_items":progress.items,
+        }
+
+        return render(request,"quests/progress.html",context)
 
     except ValidationError as e:
         _flash_validation_error(request, e, "進捗を表示できませんでした。")
@@ -278,7 +314,15 @@ def mvp_view(request):
         #     "mvp": mvp,  # TodayMvpResult
         # }
         # return render(request, "quests/mvp.html", context)
-        pass
+        team=Team.objects.get(id=my_team_id)
+        mvp=service.get_today_mvp(team=team,user=request.user)
+
+        context={
+            "team":team,
+            "daily_set":mvp.daily_set,
+            "mvp":mvp,
+        }
+        return render(request,"quests/mvp.html",context)
 
     except ValidationError as e:
         _flash_validation_error(request, e, "MVPを表示できませんでした。")
