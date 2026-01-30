@@ -1,0 +1,43 @@
+{% load static %}
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>G-BASE Create Team</title>
+		<link rel="stylesheet" href="{% static 'css/create_team.css' %}" />
+	</head>
+	<body>
+		<header class="page-header">
+			<div class="logo-wrapper">
+				<div class="pentagon-icon"></div>
+				<div class="brand-name">G-BASE</div>
+			</div>
+		</header>
+
+		<main class="content-wrapper">
+			<form
+				method="POST"
+				action="{% url 'create_team' %}"
+				class="form-container"
+			>
+				{% csrf_token %}
+
+				<h1 class="page-title"><span class="symbol">»</span>Create Team</h1>
+
+				<div class="field-group">
+					<label for="team_name">Team Name</label>
+					<input type="text" id="team_name" name="team_name" required />
+				</div>
+
+				<div class="action-area">
+					<button type="submit" class="btn-create">Create</button>
+				</div>
+
+				<div class="link-area">
+					<a href="{% url 'join_team' %}" class="link-cancel">Cancel</a>
+				</div>
+			</form>
+		</main>
+	</body>
+</html>

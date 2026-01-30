@@ -1,0 +1,125 @@
+/* ベーススタイル */
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #1e2736; /* ダークネイビー */
+	font-family:
+		"Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+		sans-serif;
+	color: #ffffff;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	overflow: hidden; /* 背景装飾のはみ出しを隠す */
+	position: relative;
+}
+
+/* 背景の装飾用五角形（共通） */
+.deco {
+	position: absolute;
+	border: 2px solid rgba(255, 255, 255, 0.8);
+	background-color: transparent;
+	clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+	z-index: 0;
+}
+
+.deco-top {
+	width: 100px;
+	height: 100px;
+	top: -20px;
+	left: -10px;
+	transform: rotate(-15deg);
+}
+.deco-top-small {
+	width: 60px;
+	height: 60px;
+	top: 60px;
+	left: 60px;
+	transform: rotate(10deg);
+}
+.deco-bottom {
+	width: 120px;
+	height: 120px;
+	bottom: -30px;
+	right: -20px;
+	transform: rotate(20deg);
+}
+.deco-bottom-small {
+	width: 50px;
+	height: 50px;
+	bottom: 80px;
+	right: 50px;
+	transform: rotate(-10deg);
+}
+
+/* メインコンテンツ */
+.welcome-container {
+	text-align: center;
+	z-index: 1; /* 装飾より前面に */
+	width: 90%;
+	max-width: 320px;
+}
+
+/* ロゴセクション */
+.logo-section {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 20px;
+	gap: 15px;
+}
+
+.pentagon-main {
+	width: 60px;
+	height: 60px;
+	border: 3px solid #f0f8a8;
+	clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+.brand-name {
+	background-color: #f0f8a8;
+	color: #1e2736;
+	font-size: 48px;
+	font-weight: 900;
+	padding: 2px 15px;
+	letter-spacing: 2px;
+}
+
+/* 「へようこそ！」テキスト */
+.welcome-text {
+	font-size: 52px;
+	margin: 10px 0 40px 0;
+	font-weight: bold;
+	letter-spacing: 4px;
+}
+
+/* 導入テキスト */
+.intro-text-box {
+	margin-bottom: 50px;
+}
+
+.intro-text-box p {
+	font-size: 26px;
+	margin: 5px 0;
+	font-weight: bold;
+	letter-spacing: 2px;
+}
+
+/* STARTボタン（丸みを帯びた角） */
+.btn-start {
+	display: inline-block;
+	background-color: #f0f8a8;
+	color: #000000;
+	text-decoration: none;
+	font-size: 36px;
+	font-weight: 900;
+	padding: 12px 60px;
+	border-radius: 50px; /* カプセル型 */
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+	transition: transform 0.2s;
+}
+
+.btn-start:hover {
+	transform: scale(1.05);
+}

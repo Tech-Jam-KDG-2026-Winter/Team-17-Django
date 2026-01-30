@@ -1,0 +1,111 @@
+/* ベーススタイル */
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #1e2736;
+	font-family: "Helvetica Neue", Arial, sans-serif;
+	color: #ffffff;
+	min-height: 100vh;
+}
+
+/* ヘッダーの設定（境界線を含む） */
+.page-header {
+	width: 100%;
+	border-bottom: 1px solid #ffffff; /* 白い横線 */
+	padding: 15px 20px;
+	box-sizing: border-box;
+}
+
+.logo-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.pentagon-icon {
+	width: 35px;
+	height: 35px;
+	border: 2.5px solid #f0f8a8;
+	clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+.brand-name {
+	background-color: #f0f8a8;
+	color: #1e2736;
+	font-size: 28px;
+	font-weight: 900;
+	padding: 2px 8px;
+}
+
+/* メインコンテンツの配置 */
+.content-wrapper {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 80px; /* 線の下の余白 */
+}
+
+.form-container {
+	width: 280px;
+	text-align: center;
+}
+
+/* タイトル部分 */
+.page-title {
+	font-size: 44px;
+	font-weight: 500;
+	text-align: left;
+	margin: 0 0 30px 0;
+	display: flex;
+	align-items: center;
+}
+
+.page-title .symbol {
+	font-size: 40px;
+	margin-right: 10px;
+}
+
+/* 入力項目 */
+.field-group {
+	text-align: left;
+	margin-bottom: 30px;
+}
+
+.field-group label {
+	display: block;
+	font-size: 18px;
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+.field-group input {
+	width: 100%;
+	height: 35px;
+	border: none;
+	background-color: #ffffff;
+	box-sizing: border-box;
+}
+
+/* Joinボタン */
+.btn-join {
+	background-color: #ffffff;
+	color: #1e2736;
+	border: none;
+	padding: 6px 45px;
+	font-size: 26px;
+	cursor: pointer;
+	font-family: serif; /* 画像の文字に合わせたセリフ体 */
+}
+
+/* Create Teamリンク */
+.link-area {
+	margin-top: 40px;
+}
+
+.link-create {
+	color: #f0f8a8;
+	text-decoration: underline;
+	font-size: 26px;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
