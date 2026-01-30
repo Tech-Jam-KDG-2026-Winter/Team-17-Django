@@ -1,13 +1,16 @@
 # src/apps/accounts/views.py
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
+from django.db import IntegrityError
 
 from .forms import LoginForm, SignupForm
 from .models import User
 
+@require_http_methods(["GET", "POST"])
 def login_view(request):
+
     """
     ログイン（email + password）
 
@@ -60,18 +63,19 @@ def signup_view(request):
         display_name = form.cleaned_data["display_name"]
         password = form.cleaned_data["password1"]
 
-        # email 重複チェック
-        if User.objects.filter(email=email).exists():
-            form.add_error("email", "このメールアドレスは既に登録されています")
-        else:
+        try:
             user = User.objects.create_user(
                 email=email,
                 password=password,
                 display_name=display_name,
             )
+        except IntegrityError:
+            # unique 制約（email重複）に対応
+            form.add_error("email", "このメールアドレスは既に登録されています")
+        else:
             login(request, user)
             return redirect("/")
-
+        
     return render(request, "auth/signup.html", {"form": form})
 
 @login_required
@@ -95,4 +99,4 @@ def logout_view(request):
     # - redirect(LOGOUT_REDIRECT_URL)
     """
     logout(request)
-    return redirect("/auth/login/")
+    return redirect("accounts:login")
