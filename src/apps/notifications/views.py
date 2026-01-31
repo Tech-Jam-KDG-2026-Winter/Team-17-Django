@@ -23,6 +23,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
+from typing import Optional
+
 
 from .services import NotificationService
 
@@ -44,7 +46,7 @@ service = NotificationService()
 # -----------------------------
 # Helpers（共通ガード）
 # -----------------------------
-def _get_my_team_id_or_none(user) -> int | None:
+def _get_my_team_id_or_none(user) -> Optional[int]:
     """
     自分の所属チームIDを返す（未所属なら None）
 
@@ -56,7 +58,7 @@ def _get_my_team_id_or_none(user) -> int | None:
     return membership.team_id if membership else None
 
 
-def _redirect_to_team_entry(request, reason: str | None = None):
+def _redirect_to_team_entry(request, reason: Optional[str] = None):
     """
     未所属ユーザーを「作成 or 参加」導線へ誘導する。
 
@@ -69,7 +71,7 @@ def _redirect_to_team_entry(request, reason: str | None = None):
     return redirect("teams:join")
 
 
-def _guard_team_access(request, team_id: int) -> int:
+def _guard_team_mismatch(request, team_id: int) -> Optional[int]:
     """
     notifications 画面の共通ガード。
 
@@ -87,12 +89,10 @@ def _guard_team_access(request, team_id: int) -> int:
     """
     my_team_id = _get_my_team_id_or_none(request.user)
     if my_team_id is None:
-        # 未所属は views 側で teams entry へ redirect したい（UXも良い）
-        raise ValidationError({"team": "あなたはまだチームに所属していません"})
+        return None
 
     if my_team_id != team_id:
-        # 所属不一致（横読み防止）
-        raise ValidationError({"permission": "あなたはこのチームの通知を閲覧できません"})
+        raise ValidationError({"permission": "あなたはこのチームの通知を閲覧できません。"})
 
     return my_team_id
 
@@ -125,7 +125,7 @@ def notification_list_view(request, team_id: int):
         return _redirect_to_team_entry(request, "通知を見るには、まずチームに参加してください。")
 
     try:
-        _guard_team_access(request, team_id)
+        _guard_team_mismatch(request, team_id)
 
         # TODO:
         # feed = service.list_feed(team_id=team_id, user=request.user)
@@ -204,7 +204,7 @@ def notification_read_all_view(request, team_id: int):
         return _redirect_to_team_entry(request, "通知を見るには、まずチームに参加してください。")
 
     try:
-        _guard_team_access(request, team_id)
+        _guard_team_mismatch(request, team_id)
 
         # TODO:
         # created_count = service.mark_all_read(team_id=team_id, user=request.user)
