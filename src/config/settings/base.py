@@ -30,7 +30,8 @@ if not DEBUG and not ALLOWED_HOSTS:
 # - APIキー・モデル・タイムアウト・リトライ・機能ON/OFFを settings に集約
 # - views からは直接触らず、services -> integrations 経由で参照する
 
-AI_ENABLED = os.getenv("AI_ENABLED", "true").lower() == "true"
+# 緊急対応用にfalseに設定
+AI_ENABLED = os.getenv("AI_ENABLED", "false").lower() == "true"
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 if AI_ENABLED and not OPENAI_API_KEY:
