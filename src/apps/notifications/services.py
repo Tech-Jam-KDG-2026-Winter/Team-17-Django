@@ -257,7 +257,7 @@ class NotificationService:
         # 難易度はアプリの雰囲気に合わせて英語で!!
         if difficulty == "hard":
             return "今日は上級。無理せず、でも一歩だけ前へ。"
-        if difficulty == "NORMAL":
+        if difficulty == "normal":
             return "中級いける日。フォーム意識していこう。"
         return "初級でもOK。続けた人が勝つ。"
 
