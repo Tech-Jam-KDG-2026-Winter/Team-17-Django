@@ -26,6 +26,7 @@ from django.views.decorators.http import require_POST
 from apps.teams.models import Team
 from .services import QuestService
 
+
 # -----------------------------
 # Service accessor
 # -----------------------------
@@ -39,6 +40,7 @@ def _service() -> QuestService:
 # -----------------------------
 # Helpers（teams と同じ思想で統一）
 # -----------------------------
+
 
 # リーダーのカンペに基づき Optional ではなく | None スタイルを適用
 def _get_my_team_id_or_none(user) -> int | None:
@@ -82,6 +84,7 @@ def _flash_validation_error(request, e: ValidationError, fallback: str):
 # Views
 # -----------------------------
 
+
 @login_required
 def today_view(request):
     """
@@ -89,7 +92,9 @@ def today_view(request):
     """
     my_team_id = _get_my_team_id_or_none(request.user)
     if my_team_id is None:
-        return _redirect_to_team_entry(request, "クエストを見るには、まずチームに参加してください。")
+        return _redirect_to_team_entry(
+            request, "クエストを見るには、まずチームに参加してください。"
+        )
 
     try:
         # あなたが実装したロジックを残しつつ、コメントアウトも維持
@@ -105,7 +110,7 @@ def today_view(request):
         #     "team": team,
         #     "daily_set": result.daily_set,
         #     "items": result.items,               # DailyQuestItem の配列
-        #     "difficulty": result.difficulty,     # "easy"/"medium"/"hard"
+        #     "difficulty": result.difficulty,     # "easy"/"NORMAL"/"hard"
         #     "generated_by": result.generated_by, # "logic"/"ai"
         # }
         # return render(request, "quests/today.html", context)
@@ -138,7 +143,9 @@ def complete_view(request, daily_item_id: int):
     """
     my_team_id = _get_my_team_id_or_none(request.user)
     if my_team_id is None:
-        return _redirect_to_team_entry(request, "達成するには、まずチームに参加してください。")
+        return _redirect_to_team_entry(
+            request, "達成するには、まずチームに参加してください。"
+        )
 
     try:
         # TODO(後輩):
@@ -157,7 +164,9 @@ def complete_view(request, daily_item_id: int):
         if result.gained_points > 0:
             messages.success(request, f"Quest Clear! +{result.gained_points}pt")
             if result.rank_before != result.rank_after:
-                messages.info(request, f"Team Rank Up! {result.rank_before}→{result.rank_after}")
+                messages.info(
+                    request, f"Team Rank Up! {result.rank_before}→{result.rank_after}"
+                )
         else:
             messages.info(request, "このクエストは達成済みです。")
         return redirect("quests:today")
@@ -177,7 +186,9 @@ def progress_view(request):
     """
     my_team_id = _get_my_team_id_or_none(request.user)
     if my_team_id is None:
-        return _redirect_to_team_entry(request, "進捗を見るには、まずチームに参加してください。")
+        return _redirect_to_team_entry(
+            request, "進捗を見るには、まずチームに参加してください。"
+        )
 
     try:
         # TODO(後輩):
@@ -190,7 +201,7 @@ def progress_view(request):
         #     "progress_items": progress.items,  # ProgressItem の配列
         # }
         # return render(request, "quests/progress.html", context)
-        team = get_object_or_404(Team, id=my_team_id)
+        team = get_object_or_404(Team, id=my_team_id, is_active=True)
         progress = _service().get_today_progress(team=team, user=request.user)
 
         context = {
@@ -215,7 +226,9 @@ def mvp_view(request):
     """
     my_team_id = _get_my_team_id_or_none(request.user)
     if my_team_id is None:
-        return _redirect_to_team_entry(request, "MVPを見るには、まずチームに参加してください。")
+        return _redirect_to_team_entry(
+            request, "MVPを見るには、まずチームに参加してください。"
+        )
 
     try:
         # TODO(後輩):

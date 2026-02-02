@@ -10,7 +10,7 @@ from django.utils import timezone
 class QuestDifficulty(models.TextChoices):
     # DB値は英語（easy/normal/hard）。表示ラベルも英語に統一。
     EASY = "easy", "Easy"
-    MEDIUM = "normal", "Normal"
+    NORMAL = "normal", "Normal"
     HARD = "hard", "Hard"
 
 
@@ -23,7 +23,7 @@ class QuestCategory(models.TextChoices):
 # MVP仕様の固定ポイント
 DEFAULT_POINTS_BY_DIFFICULTY: dict[str, int] = {
     QuestDifficulty.EASY: 10,
-    QuestDifficulty.MEDIUM: 40,
+    QuestDifficulty.NORMAL: 40,
     QuestDifficulty.HARD: 100,
 }
 
@@ -38,7 +38,7 @@ class Quest(models.Model):
 
     MVP仕様:
     - points は difficulty と整合している必要がある（事故防止）
-    easy=10 / medium=40 / hard=100
+    easy=10 / NORMAL=40 / hard=100
     """
 
     name = models.CharField(max_length=100)
@@ -73,7 +73,9 @@ class Quest(models.Model):
         expected = DEFAULT_POINTS_BY_DIFFICULTY.get(self.difficulty)
         if expected is not None and self.points != expected:
             raise ValidationError(
-                {"points": f"points must be {expected} when difficulty='{self.difficulty}' (G-BASE MVP rule)"}
+                {
+                    "points": f"points must be {expected} when difficulty='{self.difficulty}' (G-BASE MVP rule)"
+                }
             )
 
     def __str__(self) -> str:
@@ -110,7 +112,9 @@ class DailyQuestSet(models.Model):
     class Meta:
         db_table = "quests_daily_set"
         constraints = [
-            models.UniqueConstraint(fields=["team", "date"], name="uq_daily_set_team_date"),
+            models.UniqueConstraint(
+                fields=["team", "date"], name="uq_daily_set_team_date"
+            ),
         ]
         indexes = [
             models.Index(fields=["team", "date"]),
@@ -145,8 +149,12 @@ class DailyQuestItem(models.Model):
     class Meta:
         db_table = "quests_daily_item"
         constraints = [
-            models.UniqueConstraint(fields=["daily_set", "sort_order"], name="uq_daily_item_set_sort"),
-            models.UniqueConstraint(fields=["daily_set", "quest"], name="uq_daily_item_set_quest"),
+            models.UniqueConstraint(
+                fields=["daily_set", "sort_order"], name="uq_daily_item_set_sort"
+            ),
+            models.UniqueConstraint(
+                fields=["daily_set", "quest"], name="uq_daily_item_set_quest"
+            ),
         ]
         indexes = [
             models.Index(fields=["daily_set", "sort_order"]),
@@ -186,7 +194,9 @@ class QuestCompletion(models.Model):
     class Meta:
         db_table = "quests_completion"
         constraints = [
-            models.UniqueConstraint(fields=["daily_item", "user"], name="uq_completion_dailyitem_user"),
+            models.UniqueConstraint(
+                fields=["daily_item", "user"], name="uq_completion_dailyitem_user"
+            ),
         ]
         indexes = [
             models.Index(fields=["user", "completed_at"]),

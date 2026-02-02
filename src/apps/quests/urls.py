@@ -1,3 +1,4 @@
+# src/apps/quests/urls.py
 from django.urls import path
 from django.http import HttpResponse
 

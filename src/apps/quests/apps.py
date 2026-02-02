@@ -1,3 +1,4 @@
+# src/apps/quests/apps.py
 from django.apps import AppConfig
 
 

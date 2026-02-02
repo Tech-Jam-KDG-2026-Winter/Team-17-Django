@@ -29,6 +29,7 @@ class FeedItem:
     - ここでは Notification をそのまま返しても良いが、
     将来「表示用整形（AIメッセージ等）」を挟みたくなるためラップしておく。
     """
+
     notification: Notification
     is_read: bool
 
@@ -63,7 +64,9 @@ class NotificationService:
         - services に寄せておくと「どの画面でも同じ安全性」を担保できる。
         """
         if not TeamMember.objects.filter(team_id=team_id, user=user).exists():
-            raise ValidationError({"permission": "あなたはこのチームのメンバーではありません"})
+            raise ValidationError(
+                {"permission": "あなたはこのチームのメンバーではありません"}
+            )
 
     # -----------------------------
     # Feed（一覧取得）
@@ -100,12 +103,14 @@ class NotificationService:
             ).values_list("notification_id", flat=True)
         )
 
-        return [FeedItem(notification=n, is_read=(n.id in read_ids)) for n in notifications]
+        return [
+            FeedItem(notification=n, is_read=(n.id in read_ids)) for n in notifications
+        ]
 
     # -----------------------------
     # Read（既読）
     # -----------------------------
-    
+
     @transaction.atomic
     def mark_read(self, *, notification_id: int, user: "AbstractUser") -> None:
         try:
@@ -116,11 +121,11 @@ class NotificationService:
         self.assert_member(team_id=n.team_id, user=user)
 
         try:
-            NotificationRead.objects.create(notification=n, user=user, read_at=timezone.now())
+            NotificationRead.objects.create(
+                notification=n, user=user, read_at=timezone.now()
+            )
         except IntegrityError:
             return
-
-        
 
     @transaction.atomic
     def mark_all_read(self, *, team_id: int, user: "AbstractUser") -> int:
@@ -252,7 +257,7 @@ class NotificationService:
         # 難易度はアプリの雰囲気に合わせて英語で!!
         if difficulty == "hard":
             return "今日は上級。無理せず、でも一歩だけ前へ。"
-        if difficulty == "medium":
+        if difficulty == "normal":
             return "中級いける日。フォーム意識していこう。"
         return "初級でもOK。続けた人が勝つ。"
 

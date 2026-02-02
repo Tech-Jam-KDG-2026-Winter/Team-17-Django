@@ -24,7 +24,7 @@
             </div>
         {% endif %}
 
-        <form action="#" method="POST">
+        <form action="{% url 'teams:create' %}" method="POST">
             {% csrf_token %}
             
             <div class="form-group">
@@ -38,7 +38,7 @@
         </form>
 
         <div class="links">
-            <a href="#">Cancel</a>
+            <a href="{% url 'teams:join' %}">Cancel</a>
         </div>
     </main>
 

@@ -4,6 +4,7 @@ from django.views.decorators.http import require_http_methods, require_POST, req
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
 from django.db import IntegrityError
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import LoginForm, SignupForm
 from .models import User
@@ -35,12 +36,19 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
+
+            # next を安全に優先（オープンリダイレクト対策）
+            next_url = request.POST.get("next") or request.GET.get("next")
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
+
             return redirect("/")
         else:
             form.add_error(None, "メールアドレスまたはパスワードが正しくありません")
 
     return render(request, "auth/login.html", {"form": form})
 
+@require_http_methods(["GET", "POST"])
 def signup_view(request):
     """
     新規登録（email + password）
@@ -74,7 +82,7 @@ def signup_view(request):
             form.add_error("email", "このメールアドレスは既に登録されています")
         else:
             login(request, user)
-            return redirect("/")
+            return redirect("accounts:welcome")
         
     return render(request, "auth/signup.html", {"form": form})
 
@@ -98,9 +106,22 @@ def logout_view(request):
     # - logout(request)
     # - redirect(LOGOUT_REDIRECT_URL)
     """
+    # logout_view
     logout(request)
-    return redirect("accounts:login")
+    return redirect("/auth/login/")
+
 
 @require_GET
 def welcome(request):
     return render(request, "onboarding/welcome.html")
+
+@login_required
+@require_GET
+def settings_view(request):
+    """
+    Settings（MVP: 参照のみ）
+    - display_name / email を表示するだけのページ(ログアウトはボタンとして機能)
+    - 更新はしない
+    """
+    user: User = request.user  # type: ignore[assignment]
+    return render(request, "accounts/settings.html", {"user_obj": user})
