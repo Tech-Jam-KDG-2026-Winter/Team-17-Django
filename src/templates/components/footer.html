@@ -1,35 +1,47 @@
 {% load static %}
 
+<link rel="stylesheet" href="{% static 'css/footer.css' %}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
 <footer class="footer">
 
-    <a href="{% url 'dashboard:index' %}"
-    class="footer-item {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
-        <i class="fa-solid fa-house"></i>
-        <span>Home</span>
-    </a>
+<a href="{% url 'dashboard:index' %}"
+    class="footer-item {% if request.resolver_match.app_name == 'dashboard' %}active{% endif %}">
+    <i class="fa-solid fa-house"></i>
+    <span>Home</span>
+</a>
 
-    <a href="{% url 'notifications:index' %}"
-    class="footer-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">
-        <div class="notif-wrapper">
-            <i class="fa-regular fa-bell"></i>
+<a href="{% url 'notifications:index' %}"
+class="footer-item {% if request.resolver_match.app_name == 'notifications' %}active{% endif %}">
+    <div class="notif-wrapper">
+        <i class="fa-regular fa-bell"></i>
+        {% if has_unread_notifications %}
+        <span class="notif-dot"></span>
+        {% endif %}
+    </div>
+    <span>Notifs</span>
+</a>
 
-            {% if has_unread_notifications %}
-                <span class="notif-dot"></span>
-            {% endif %}
-        </div>
-        <span>Notifs</span>
-    </a>
 
+{% if team and team.id %}
     <a href="{% url 'teams:detail' team.id %}"
-	class="footer-item {% if request.resolver_match.app_name == 'teams' %}active{% endif %}">
-        <i class="fa-solid fa-user-group"></i>
-        <span>Teams</span>
+    class="footer-item {% if request.resolver_match.app_name == 'teams' %}active{% endif %}">
+    <i class="fa-solid fa-user-group"></i>
+    <span>Teams</span>
     </a>
+{% else %}
+    <a href="{% url 'teams:join' %}"
+    class="footer-item {% if request.resolver_match.app_name == 'teams' %}active{% endif %}">
+    <i class="fa-solid fa-user-group"></i>
+    <span>Teams</span>
+    </a>
+{% endif %}
 
-    <a href="{% url 'accounts:settings' %}"
-	class="footer-item {% if request.resolver_match.app_name == 'accounts' %}active{% endif %}">
-        <i class="fa-solid fa-gear"></i>
-        <span>Settings</span>
-    </a>
+
+<a href="{% url 'accounts:settings' %}"
+class="footer-item {% if request.resolver_match.app_name == 'accounts' %}active{% endif %}">
+    <i class="fa-solid fa-gear"></i>
+    <span>Settings</span>
+</a>
 
 </footer>

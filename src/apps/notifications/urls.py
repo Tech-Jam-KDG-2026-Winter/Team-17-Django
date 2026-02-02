@@ -11,6 +11,10 @@ app_name = "notifications"
 
 
 urlpatterns = [
+
+    # footer用：/notifications/ で自分のチームの通知へ
+    path("", views.notifications_index_view, name="index"),
+
     # チーム通知フィード（チーム内タイムライン）
     # GET: 一覧表示
     path("team/<int:team_id>/", views.notification_list_view, name="list"),

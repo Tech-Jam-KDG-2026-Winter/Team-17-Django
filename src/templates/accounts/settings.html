@@ -5,17 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 Not Found | G-BASE</title>
-    <link rel="stylesheet" href="{% static 'css/errors.css' %}">
+    <link rel="stylesheet" href="{% static 'css/setting.css' %}">
 </head>
 <body>
 {% include "components/header.html" %}
 <div>
-    <div>UserName</div>
-    <div>{{ user_obj.display_name }}</div>
+    <h2 class="settings-title">&gt;&gt; Settings</h2>
+
+    <div class="settings-group">
+        <label class="settings-label">UserName</label>
+        <div class="settings-value">
+            {{ user_obj.display_name }}
+    </div>
+</div>
     
-    <div>Emails</div>
-    
-    <div>{{ user_obj.email }}</div>
+    <div class="settings-group">
+        <label class="settings-label">Emails</label>
+    <div class="settings-value">
+        {{ user_obj.email }}
+    </div>
+</div>
     
     <form method="post" 
     action="{% url 'accounts:logout' %}"
@@ -24,6 +33,8 @@
     <button type="submit">Log out →</button> 
 </form>
 </div>
+
+{% include "components/footer.html" %}
 
 </body>
 </html>
