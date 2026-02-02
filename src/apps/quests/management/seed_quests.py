@@ -1,3 +1,4 @@
+# src/apps/quests/management/seed_quests.py
 # クエスト項目のリスト(後回しでもいいけど、あれば良い)
 # 難易度 / クエスト名 / カテゴリ / 備考 / ポイント
 # 

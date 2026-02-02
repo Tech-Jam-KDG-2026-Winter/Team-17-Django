@@ -1,3 +1,4 @@
+# src/apps/quests/admin.py
 from django.contrib import admin
 
 from .models import Quest, DailyQuestSet, DailyQuestItem, QuestCompletion
