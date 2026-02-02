@@ -17,23 +17,55 @@
         <section class="member-section">
             <ul class="member-list">
                 {% for member in members %}
-                    <li class="member-item {% if member.is_leader %}leader{% endif %}">
-                        <div class="member-info">
-                            {% if member.is_leader %}
-                                <img src="{% static 'images/leader_icon.png' %}" alt="Leader" class="leader-badge">
-                            {% endif %}
-                            <span class="member-name">{{ member.user.username }}</span>
-                        </div>
-                    </li>
+                    {% with is_leader=member.user_id|yesno:"" %}
+                    {% endwith %}
+                
+                    {% if member.user_id == team.owner_id %}
+                        {% with is_leader=True %}
+                            <li class="member-item leader">
+                                <div class="member-info">
+                                    <img src="{% static 'images/leader_icon.png' %}" alt="Leader" class="leader-badge">
+                                    <span class="member-name">{{ member.user.display_name }}</span>
+                                </div>
+                            </li>
+                        {% endwith %}
+                
+                    {% else %}
+                        <li class="member-item">
+                            <div class="member-info">
+                                <span class="member-name">{{ member.user.display_name }}</span>
+                            </div>
+                        </li>
+                    {% endif %}
                 {% endfor %}
             </ul>
 
-            {% if members|length < 5 %}
-                <div class="actions">
-                    <button type="button" class="btn-add" onclick="openModal()">Add Member</button>
-                </div>
+            {% if members|length < team.max_members %}
+            <div class="actions">
+                <!-- 本当は invite modal を開くボタンにするのが自然 -->
+                <button type="button" class="btn-add" onclick="openModal()">Add Member</button>
+            </div>
+        {% endif %}
+    </section>
+
+    {# 招待コード表示（inviteが無い場合もあるのでガード） #}
+    {% if invite and invite.is_active %}
+        <section class="invite">
+            <p>招待コード: <strong>{{ invite.code }}</strong></p>
+            {% if request.user.id == team.owner_id %}
+                <form method="post" action="{% url 'teams:invite_regenerate' team.id %}">
+                    {% csrf_token %}
+                    <button type="submit">招待コードを再生成</button>
+                </form>
+
+                <form method="post" action="{% url 'teams:invite_deactivate' team.id %}">
+                    {% csrf_token %}
+                    <button type="submit">招待コードを無効化</button>
+                </form>
             {% endif %}
         </section>
+    {% endif %}
+
 
         <!-- 変更点　2026/02/02　現時点 -->
         <section class="danger-zone">
