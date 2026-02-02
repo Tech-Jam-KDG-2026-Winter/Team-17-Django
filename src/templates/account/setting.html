@@ -1,0 +1,31 @@
+ {% include "components/header.html" %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/setting.css' %}" />
+
+<div class="settings-container">
+
+  <h2 class="settings-title">&gt;&gt; Settings</h2>
+
+  <div class="settings-group">
+    <label class="settings-label">UserName</label>
+    <div class="settings-value">
+    <!-- viewsの設定はこれからするためまだ{{}}の中は空の状態 -->
+      {{ request.user.display_name }}
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <label class="settings-label">Emails</label>
+    <div class="settings-value">
+      {{ request.user.email }}
+    </div>
+  </div>
+
+  <div class="logout-area">
+    <a href="#" class="logout-link">
+      Log out →
+    </a>
+  </div>
+
+</div>
+{% include "components/footer.html" %}
