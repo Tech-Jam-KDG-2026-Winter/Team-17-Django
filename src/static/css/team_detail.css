@@ -1,0 +1,169 @@
+/* 全体のレイアウト設定 */
+body {
+    background-color: #1a2233; /* 濃紺 */
+    color: #ffffff;
+    font-family: "Inter", sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* メインコンテンツ */
+.container {
+    flex: 1;
+    padding: 40px 20px;
+    max-width: 767px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* チーム名 (中央上部) */
+.team-name {
+    color: #faff81; /* ネオンイエロー */
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow:
+        0 0 7px #fff,          /* 最も内側の白い光 */
+        0 0 1px #faff81;      /* 最も外側の強い光 */
+}
+
+/* セクションの見出し (>> Members) */
+.member-section::before {
+    content: ">> Members";
+    display: block;
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #3d475f;
+    padding-bottom: 10px;
+
+    text-shadow:
+        0 0 7px #fff,          /* 最も内側の白い光 */
+        0 0 1px #faff81;      /* 最も外側の強い光 */
+}
+
+/* メンバーリスト */
+.member-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.member-item {
+    background-color: #2a344a; /* リスト項目の背景 */
+    margin-bottom: 8px;
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+}
+
+/* リーダーアイコン */
+.leader-badge {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+}
+
+.member-name {
+    font-size: 18px;
+    font-weight: 500;
+}
+/* --- Add Member ボタンのエリア --- */
+.actions {
+    text-align: center;
+    margin-top: 30px;
+    width: 100%;           /* 幅をいっぱいにする */
+    display: flex;         /* flexを使って中央寄せを確実にする */
+    justify-content: center;
+}
+
+.btn-add {
+    background-color: #F7FF78;
+    color: #1a2233;        /* 背景色の濃紺 */
+    border: none;
+    padding: 12px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 0;      /* 完全に四角 */
+    display: block;        /* ブロック要素化 */
+}
+
+/* --- チームを解散ボタンのエリア --- */
+.danger-zone {
+    margin-top: 60px;
+    text-align: center;
+    width: 100%;
+    display: flex;         /* 中央寄せを確実にする */
+    justify-content: center;
+}
+
+.btn-delete {
+    background-color: transparent;
+    color: #ff4d4d;        /* 赤文字 */
+    border: none;
+    padding: 8px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: #ff4d4d; /* 赤い下線 */
+    text-underline-offset: 5px;
+}
+/* モーダルのスタイル */
+.modal {
+    display: none; /* JSで制御 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #1a2233;
+    border: 2px solid #faff81; /* 黄色い枠線 */
+    padding: 30px;
+    width: 80%;
+    max-width: 350px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.modal-content h3 {
+    color: #faff81;
+    margin-top: 0;
+}
+
+.invite-code {
+    font-size: 32px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    margin: 20px 0;
+    background: #2a344a;
+    padding: 10px;
+}
+
+.btn-close {
+    background-color: #faff81;
+    color: #1a2233;
+    border: none;
+    padding: 10px 30px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}

@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/team_detail.css' %}" />
+</head>
+<body>
+
+    {% include "components/header.html" %}
+
+    <main class="container">
+        <h1 class="team-name">{{ team.name }}</h1>
+
+        <section class="member-section">
+            <ul class="member-list">
+                {% for member in members %}
+                    <li class="member-item {% if member.is_leader %}leader{% endif %}">
+                        <div class="member-info">
+                            {% if member.is_leader %}
+                                <img src="{% static 'images/leader_icon.png' %}" alt="Leader" class="leader-badge">
+                            {% endif %}
+                            <span class="member-name">{{ member.user.username }}</span>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% if members|length < 5 %}
+                <div class="actions">
+                    <button type="button" class="btn-add" onclick="openModal()">Add Member</button>
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- 変更点　2026/02/02　現時点 -->
+        <section class="danger-zone">
+            <button type="button" class="btn-delete">チームを解散</button>
+        </section>
+    </main>
+
+    <!-- 以下モーダル -->
+    <!-- <div id="inviteModal" class="modal">
+        <div class="modal-content">
+            <h3>Invite Code</h3>
+            <p class="invite-code">{{ invite.code }}</p>
+            <p class="invite-info">このコードをメンバーに共有してください。</p>
+            <button class="btn-close" onclick="closeModal()">Close</button>
+        </div>
+    </div> -->
+
+    {% include "components/footer.html" %}
+
+    <!-- <script>
+        function openModal() {
+            document.getElementById('inviteModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('inviteModal').style.display = 'none';
+        }
+        window.onclick = function(event) {
+            const modal = document.getElementById('inviteModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script> -->
+</body>
+</html>
