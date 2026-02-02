@@ -7,9 +7,9 @@
 			<div class="rank-letter">{{team.rank}}</div>
 			<div class="rank-point">
 				{% if team.rank == 'A' %}
-      		MAX RANK
+				MAX RANK
         {% else %}
-          {{ team.total_points }} / {{ next_rank_threshold }} pt
+		{{ team.total_points }} / {{ next_rank_threshold }} pt
         {% endif %}
 			</div>
 		</div>
