@@ -63,10 +63,11 @@
                     <button type="submit">招待コードを再生成</button>
                 </form>
 
-                <form method="post" action="{% url 'teams:invite_deactivate' team.id %}">
+            <!---今回は無効化をコメントアウトしておく--->
+            <!----<form method="post" action="{% url 'teams:invite_deactivate' team.id %}">
                     {% csrf_token %}
                     <button type="submit">招待コードを無効化</button>
-                </form>
+                </form>-->    
             {% endif %}
         </section>
     {% endif %}

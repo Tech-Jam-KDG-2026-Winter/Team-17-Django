@@ -4,9 +4,7 @@ from __future__ import annotations
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 
 from apps.teams.models import Team
 from apps.quests.models import QuestCompletion
@@ -42,18 +40,14 @@ def _flash_validation_error(request, e: ValidationError, fallback: str):
 
 
 def _next_rank_threshold(rank: str) -> int:
-    """
-    quests/services.py の calculate_rank() の閾値と整合する「次ランク到達ライン」。
-    表示用（リングの 80/100pt の 100側）に使う。
-    """
     r = (rank or "F").upper()
     table = {
-        "F": 100,   # F->E
-        "E": 300,   # E->D
-        "D": 600,   # D->C
-        "C": 1100,  # C->B
-        "B": 1600,  # B->A
-        "A": 2100,  # A
+        "F": 100,
+        "E": 300,
+        "D": 600,
+        "C": 1100,
+        "B": 1600,
+        "A": 2100,
     }
     return table.get(r, 100)
 
@@ -61,11 +55,7 @@ def _next_rank_threshold(rank: str) -> int:
 @login_required
 def dashboard_index_view(request):
     """
-    Dashboard（Home）:
-    - Team概要（name/rank/points）
-    - 今日の進捗（★：今日1つでも達成したメンバー数）
-    - 今日のMVP
-    - 今日のクエスト4件（カード + 達成ボタン）
+    Dashboard（Home）
     """
     my_team_id = _get_my_team_id_or_none(request.user)
     if my_team_id is None:
@@ -74,12 +64,25 @@ def dashboard_index_view(request):
     team = get_object_or_404(Team, id=my_team_id, is_active=True)
     service = _quest_service()
 
-    try:
-        # 1) 今日のセット（4件）
-        today = service.get_or_create_today_set(team=team, user=request.user)
-        quest_items = today.items  # DailyQuestItem の list
+    # ★ 例外が起きても描画できる最低限の context を先に作る
+    context = {
+        "team": team,
+        "items": [],
+        "my_done_ids": set(),
+        "completed_count": 0,
+        "mvp": None,
+        "next_rank_threshold": _next_rank_threshold(team.rank),
+        "daily_set": None,
+        "difficulty": None,
+        "generated_by": None,
+    }
 
-        # 2) 自分が達成済みの daily_item_id（CLEAR!表示用）
+    try:
+        # 1) 今日のセット
+        today = service.get_or_create_today_set(team=team, user=request.user)
+        quest_items = today.items
+
+        # 2) 自分の達成済み
         my_done_ids = set(
             QuestCompletion.objects.filter(
                 user=request.user,
@@ -87,8 +90,7 @@ def dashboard_index_view(request):
             ).values_list("daily_item_id", flat=True)
         )
 
-        # 3) ★仕様：今日、チーム内で「1つでも達成した人」の人数
-        # 今日セットに紐づく達成ログから user を distinct で数える
+        # 3) ★ 今日1つでも達成した人数
         completed_count = (
             QuestCompletion.objects.filter(daily_item__daily_set=today.daily_set)
             .values("user_id")
@@ -99,30 +101,21 @@ def dashboard_index_view(request):
         # 4) MVP
         mvp = service.get_today_mvp(team=team, user=request.user)
 
-        # 5) 次ランク閾値（リング表示用）
-        next_rank_threshold = _next_rank_threshold(team.rank)
-
-        context = {
-            "team": team,
-
-            # ---- ここが「後輩テンプレの変数名」に合わせた部分 ----
-            "items": quest_items,                     # today_card.html が items を参照
-            "my_done_ids": my_done_ids,               # today_card.html が参照
-            "completed_count": completed_count,       # progress_star.html が参照
-            "mvp": mvp,                               # mvp.html が参照
-            "next_rank_threshold": next_rank_threshold,  # progress_bar.html が参照
-
-            # 参考用に残す（使わなくてもOK）
+        # context 更新（後輩テンプレ互換）
+        context.update({
+            "items": quest_items,
+            "my_done_ids": my_done_ids,
+            "completed_count": completed_count,
+            "mvp": mvp,
             "daily_set": today.daily_set,
             "difficulty": today.difficulty,
             "generated_by": today.generated_by,
-        }
-
-        return render(request, "dashboard/index.html", context)
+        })
 
     except ValidationError as e:
-        _flash_validation_error(request, e, "ダッシュボードを表示できませんでした。")
-        return redirect("teams:detail", team_id=my_team_id)
+        _flash_validation_error(request, e, "ダッシュボードの一部を表示できませんでした。")
     except Exception:
-        messages.error(request, "予期しないエラーが発生しました。")
-        return redirect("teams:detail", team_id=my_team_id)
+        messages.error(request, "ダッシュボードの読み込みに失敗しました。")
+
+    # ★ ここが重要：必ず dashboard を描画する
+    return render(request, "dashboard/index.html", context)
