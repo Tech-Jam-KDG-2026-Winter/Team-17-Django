@@ -44,9 +44,15 @@ accounts app の login view と 1:1 で対応する。
             <div class="brand-name">G-BASE</div>
         </div>
 
-        <form method="POST" action="#" class="form-container">
+        <form method="POST" action="{% url 'accounts:login' %}" class="form-container">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
             <h1 class="page-title">Log in</h1>
+            {% if form.errors %}
+            <div class="form-errors">
+                {{ form.errors }}
+            </div>
+            {% endif %}
 
             <div class="field-group">
                 <label for="id_email">Email</label>
@@ -63,7 +69,7 @@ accounts app の login view と 1:1 で対応する。
             </div>
 
             <div class="link-area">
-                <a href="#" class="link-signup">Signup</a>
+                <a href="{% url 'accounts:signup' %}" class="link-signup">Signup</a>
             </div>
         </form>
     </div>
