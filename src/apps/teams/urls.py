@@ -21,6 +21,9 @@ urlpatterns = [
     # チーム情報
     path("<int:team_id>/", views.team_detail_view, name="detail"),
 
+    # チーム解散
+    path("<int:team_id>/dissolve/", views.team_dissolve_view, name="dissolve"),
+
     # 招待コード（再生成/無効化）
     path("<int:team_id>/invite/regenerate/", views.invite_regenerate_view, name="invite_regenerate"),
     path("<int:team_id>/invite/deactivate/", views.invite_deactivate_view, name="invite_deactivate"),

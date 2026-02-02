@@ -228,6 +228,32 @@ def team_detail_view(request, team_id: int):
 
 @login_required
 @require_POST
+def team_dissolve_view(request, team_id: int):
+    """
+    チーム解散（ownerのみ）
+    """
+    my_team_id = _get_my_team_id_or_none(request.user)
+    if my_team_id is None:
+        return _redirect_to_team_entry(request, "チームに所属していません。")
+
+    if my_team_id != team_id:
+        messages.error(request, "他のチーム操作はできません。")
+        return redirect("teams:detail", team_id=my_team_id)
+
+    try:
+        service.dissolve_team(team_id=team_id, actor=request.user)
+        messages.success(request, "チームを解散しました。")
+        # 解散したので未所属 → join へ
+        return redirect("teams:join")
+    except ValidationError as e:
+        messages.error(request, _validation_error_to_message(e))
+        return redirect("teams:detail", team_id=team_id)
+    except Exception:
+        messages.error(request, "解散処理に失敗しました。もう一度お試しください。")
+        return redirect("teams:detail", team_id=team_id)
+
+@login_required
+@require_POST
 def invite_regenerate_view(request, team_id: int):
     """
     招待コード再生成

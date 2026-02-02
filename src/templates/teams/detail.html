@@ -66,11 +66,16 @@
         </section>
     {% endif %}
 
-
-        <!-- 変更点　2026/02/02　現時点 -->
-        <section class="danger-zone">
-            <button type="button" class="btn-delete">チームを解散</button>
-        </section>
+    <section class="danger-zone">
+        {% if request.user.id == team.owner_id %}
+            <form method="post" action="{% url 'teams:dissolve' team.id %}"
+                onsubmit="return confirm('本当にチームを解散しますか？この操作は取り消せません。');">
+                {% csrf_token %}
+                <button type="submit" class="btn-delete">チームを解散</button>
+            </form>
+        {% endif %}
+    </section>
+        
     </main>
 
     <!-- 以下モーダル -->

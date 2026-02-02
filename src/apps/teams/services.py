@@ -185,6 +185,24 @@ class TeamService:
 
         return JoinResult(team=team, membership=membership)
 
+    #-------------------------------
+    # チーム解散
+    #-------------------------------
+
+    @transaction.atomic
+    def dissolve_team(self, *, team_id: int, actor):
+        """
+        チーム解散（物理削除）
+        - owner のみ実行可
+        - Team を削除すると TeamMember / TeamInvite は CASCADE で消える
+        """
+        team = Team.objects.select_for_update().get(id=team_id)
+
+        if team.owner_id != actor.id:
+            raise ValidationError({"permission": "チームの解散はチーム作成者のみ可能です"})
+
+        team.delete()
+
     # -----------------------------
     # Team points / rank (quests未整備でも作れる “受け皿”)
     # -----------------------------
