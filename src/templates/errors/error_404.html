@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found | G-BASE</title>
+    <link rel="stylesheet" href="{% static 'css/errors.css' %}">
+</head>
+<body>
+    {% include "components/header.html" %}
+
+    <main class="error-container">
+        <div class="error-content">
+            <h1 class="error-code">404</h1>
+            
+            <div class="error-message">
+                <p class="status">Not found</p>
+                <p class="description">ページが見つかりませんでした</p>
+            </div>
+
+            <div class="action-area">
+                <a href="/" class="btn-back">TOPに戻る</a>
+            </div>
+        </div>
+
+        <div class="deco deco-top"></div>
+        <div class="deco deco-bottom"></div>
+    </main>
+
+</body>
+</html>

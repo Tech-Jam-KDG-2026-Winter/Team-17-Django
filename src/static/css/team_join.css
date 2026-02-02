@@ -1,0 +1,99 @@
+/* 全体のレイアウト設定 */
+body {
+    background-color: #1a2233; /* 画像に基づいた濃紺 */
+    color: #ffffff;
+    font-family: "Inter", "sans-serif";
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* メインコンテンツの配置 */
+.container {
+    flex: 1;
+    padding: 60px 40px; /* 上下にゆとりを持たせる */
+    max-width: 767px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* 「>> Join Team」タイトル */
+.container h2 {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 40px;
+    /* 変更点 */
+    letter-spacing: 2px;
+    text-shadow:
+        0 0 7px #fff,          /* 最も内側の白い光 */
+        0 0 1px #faff81;      /* 最も外側の強い光 */
+}
+
+/* フォームラベル（招待コード） */
+.form-group label {
+    font-size: 18px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 12px;
+}
+
+/* 招待コード入力欄 */
+input[type="text"] {
+    width: 100%;
+    height: 48px;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 0; /* 画像に合わせる */
+    padding: 0 10px;
+    font-size: 18px;
+    box-sizing: border-box;
+    margin-bottom: 40px;
+}
+
+/* Joinボタン（ネオンイエロー） */
+.actions {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+button[type="submit"] {
+    background-color: #faff81; /* ネオンイエロー */
+    color: #1a2233;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    padding: 10px 60px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+button[type="submit"]:hover {
+    opacity: 0.8;
+}
+
+/* Create Team リンク（下線付き） */
+.links {
+    text-align: center;
+}
+
+.links a {
+    color: #faff81;
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: underline;
+    text-underline-offset: 8px;
+}
+
+/* エラーメッセージ（存在する場合） */
+.messages p {
+    color: #ff4d4d;
+    font-weight: bold;
+    margin-bottom: 20px;
+}

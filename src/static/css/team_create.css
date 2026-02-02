@@ -1,110 +1,108 @@
-/* ベーススタイル */
+/* 全体の基本設定 */
 body {
-	margin: 0;
-	padding: 0;
-	background-color: #1e2736;
-	font-family: "Helvetica Neue", Arial, sans-serif;
-	color: #ffffff;
-	min-height: 100vh;
+    background-color: #1e2639; /* 画像に基づいたダークネイビー */
+    color: #ffffff;
+    font-family: 'Inter', sans-serif; /* デザインに近いサンセリフ体 */
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* ヘッダー・境界線 */
-.page-header {
-	width: 100%;
-	border-bottom: 1px solid #ffffff;
-	padding: 15px 20px;
-	box-sizing: border-box;
+/* メインコンテンツのコンテナ */
+.container {
+    flex: 1;
+    max-width: 767px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 80px 30px; /* 上部の余白を広めにとり、中央に寄せる */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
-.logo-wrapper {
-	display: flex;
-	align-items: center;
-	gap: 10px;
+/* >> Create Team タイトル */
+.container h2 {
+    font-size: 52px;
+    font-weight: bold;
+    margin: 0 0 40px 0;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    text-shadow:
+        0 0 7px #fff,          /* 最も内側の白い光 */
+        0 0 1px #faff81;      /* 最も外側の強い光 */
 }
 
-.pentagon-icon {
-	width: 35px;
-	height: 35px;
-	border: 2.5px solid #f0f8a8;
-	clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+/* フォームグループ */
+.form-group {
+    margin-bottom: 50px;
 }
 
-.brand-name {
-	background-color: #f0f8a8;
-	color: #1e2736;
-	font-size: 28px;
-	font-weight: 900;
-	padding: 2px 8px;
+/* Team Name ラベル */
+.form-group label {
+    font-size: 20px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 15px;
 }
 
-/* メインコンテンツ */
-.content-wrapper {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding-top: 80px;
+/* 入力フィールド */
+input[type="text"] {
+    width: 100%;
+    height: 44px;
+    background-color: #ffffff;
+    border: none;
+    padding: 0 12px;
+    font-size: 18px;
+    box-sizing: border-box;
+    border-radius: 2px; /* わずかに角を落とす */
 }
 
-.form-container {
-	width: 280px;
-	text-align: center;
+/* アクションボタン（Create） */
+.actions {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 35px;
 }
 
-/* タイトル » Create Team */
-.page-title {
-	font-size: 42px;
-	font-weight: 500;
-	text-align: left;
-	margin: 0 0 30px 0;
-	display: flex;
-	align-items: center;
+button[type="submit"] {
+    background-color: #faff81; /* 特徴的なネオンイエロー */
+    color: #1e2639;
+    border: none;
+    font-size: 32px;
+    font-weight: 700;
+    padding: 12px 65px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
 }
 
-.page-title .symbol {
-	font-size: 40px;
-	margin-right: 10px;
+button[type="submit"]:hover {
+    background-color: #e6ea75;
 }
 
-/* 入力項目 */
-.field-group {
-	text-align: left;
-	margin-bottom: 35px;
+/* 下部リンク（Cancel） */
+.links {
+    text-align: center;
 }
 
-.field-group label {
-	display: block;
-	font-size: 20px;
-	margin-bottom: 10px;
+.links a {
+    color: #ffffff;
+    font-size: 32px;
+    font-weight: 500;
+    text-decoration: underline;
+    text-underline-offset: 10px;
+    text-decoration-thickness: 2px;
 }
 
-.field-group input {
-	width: 100%;
-	height: 35px;
-	border: none;
-	background-color: #ffffff;
+/* メッセージ表示用（エラーなど） */
+.messages {
+    margin-bottom: 20px;
 }
 
-/* Createボタン（黄色背景・サンセリフ体） */
-.btn-create {
-	background-color: #f0f8a8;
-	color: #1e2736;
-	border: none;
-	padding: 8px 40px;
-	font-size: 28px;
-	font-weight: bold;
-	cursor: pointer;
-	font-family: "Helvetica Neue", Arial, sans-serif;
-}
-
-/* Cancelリンク（白文字・下線・セリフ体） */
-.link-area {
-	margin-top: 40px;
-}
-
-.link-cancel {
-	color: #ffffff;
-	text-decoration: underline;
-	font-size: 30px;
-	font-weight: 500;
-	font-family: "Times New Roman", serif;
+.messages p {
+    color: #faff81;
+    font-size: 16px;
+    font-weight: bold;
 }
