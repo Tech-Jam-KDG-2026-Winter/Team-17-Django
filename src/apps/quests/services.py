@@ -41,10 +41,11 @@ class TodaySetResult:
     今日の4クエストを返すためのDTO。
     views 側で扱いやすい形にする。
     """
+
     daily_set: DailyQuestSet
     items: list[DailyQuestItem]
     generated_by: str  # "logic" or "ai"
-    difficulty: str    # easy/medium/hard
+    difficulty: str  # easy/NORMAL/hard
 
 
 @dataclass(frozen=True)
@@ -53,11 +54,13 @@ class CompleteResult:
     complete() の返却用。
     views 側で flash message や表示更新に使う。
     """
+
     completion: QuestCompletion
     gained_points: int
     team_total_points: int
     rank_before: str
     rank_after: str
+
 
 @dataclass(frozen=True)
 class ProgressItem:
@@ -66,10 +69,12 @@ class ProgressItem:
     member_count: int
     is_completed_by_me: bool
 
+
 @dataclass(frozen=True)
 class TodayProgressResult:
     daily_set: DailyQuestSet
     items: list[ProgressItem]
+
 
 @dataclass(frozen=True)
 class TodayMvpResult:
@@ -104,14 +109,18 @@ class QuestService:
         user が team のメンバーであることを保証する（横読み防止）。
         """
         if not TeamMember.objects.filter(team_id=team_id, user=user).exists():
-            raise ValidationError({"permission": "あなたはこのチームのメンバーではありません"})
-    
+            raise ValidationError(
+                {"permission": "あなたはこのチームのメンバーではありません"}
+            )
+
     def assert_unlocked(self, *, team: Team) -> None:
         """
         要件: 2人以上でクエスト解放。
         """
         if not team.is_quest_unlocked:
-            raise ValidationError({"unlock": "クエストは2人以上で解放されます（仲間を招待してください）"})
+            raise ValidationError(
+                {"unlock": "クエストは2人以上で解放されます（仲間を招待してください）"}
+            )
 
         if team.is_full and team.member_count > team.max_members:
             raise ValidationError({"team": "チーム人数が上限を超えています"})
@@ -125,14 +134,14 @@ class QuestService:
 
         要件:
         - A,B => HARD
-        - C,D => MEDIUM（※モデル上 normal ではなく medium）
+        - C,D => NORMAL（※モデル上 normal ではなく NORMAL）
         - E,F => EASY
         """
         rank = (team_rank or "F").upper()
         if rank in ("A", "B"):
             return QuestDifficulty.HARD
         if rank in ("C", "D"):
-            return QuestDifficulty.MEDIUM
+            return QuestDifficulty.NORMAL
         return QuestDifficulty.EASY
 
     # ------------------------------------------------------------
@@ -171,7 +180,9 @@ class QuestService:
     # ------------------------------------------------------------
     # Today set (create or get)
     # ------------------------------------------------------------
-    def get_or_create_today_set(self, *, team: Team, user: "AbstractUser") -> TodaySetResult:
+    def get_or_create_today_set(
+        self, *, team: Team, user: "AbstractUser"
+    ) -> TodaySetResult:
         """
         「今日の4つ」を取得する。
         なければ生成して固定する（date単位で1つ）。
@@ -183,7 +194,9 @@ class QuestService:
         self.assert_member(team_id=team.id, user=user)
         self.assert_unlocked(team=team)
 
-        today = timezone.localdate()  # JST想定（settings.TIME_ZONE が Asia/Tokyo ならOK）
+        today = (
+            timezone.localdate()
+        )  # JST想定（settings.TIME_ZONE が Asia/Tokyo ならOK）
         difficulty = self.decide_daily_difficulty_by_rank(team_rank=team.rank)
 
         # 既に今日のセットがあるならそれを返す
@@ -194,18 +207,15 @@ class QuestService:
                 .select_related("quest", "daily_set")
                 .order_by("sort_order")
             )
-            return TodaySetResult(
-                qs,
-                items,
-                qs.generated_by,
-                qs.difficulty
-            )
+            return TodaySetResult(qs, items, qs.generated_by, qs.difficulty)
 
         # 無ければ生成（並行実行に備えて transaction / unique constraint を吸収）
         return self._create_today_set(team=team, today=today, difficulty=difficulty)
 
     @transaction.atomic
-    def _create_today_set(self, *, team: Team, today, difficulty: str) -> TodaySetResult:
+    def _create_today_set(
+        self, *, team: Team, today, difficulty: str
+    ) -> TodaySetResult:
         """
         今日のDailyQuestSetを作成する（内部）。
         """
@@ -220,10 +230,14 @@ class QuestService:
                 .select_related("quest", "daily_set")
                 .order_by("sort_order")
             )
-            return TodaySetResult(existing, items, existing.generated_by, existing.difficulty)
+            return TodaySetResult(
+                existing, items, existing.generated_by, existing.difficulty
+            )
 
         # 1) 4つ選ぶ（AI優先→失敗したらロジック）
-        quests, generated_by = self._recommend_4_quests(team=team, difficulty=difficulty)
+        quests, generated_by = self._recommend_4_quests(
+            team=team, difficulty=difficulty
+        )
 
         # 2) DailyQuestSet 作成
         daily_set = DailyQuestSet.objects.create(
@@ -252,7 +266,9 @@ class QuestService:
     # ------------------------------------------------------------
     # Recommend (AI with fallback)
     # ------------------------------------------------------------
-    def _recommend_4_quests(self, *, team: Team, difficulty: str) -> tuple[list[Quest], str]:
+    def _recommend_4_quests(
+        self, *, team: Team, difficulty: str
+    ) -> tuple[list[Quest], str]:
         """
         今日の4つを選ぶ。
 
@@ -261,7 +277,9 @@ class QuestService:
         - 失敗時: ロジック（random + 2カテゴリ分散）
         """
         # --- AIルート（将来差し替え前提 / 今は失敗しても落ちない） ---
-        if getattr(settings, "AI_ENABLED", False) and getattr(settings, "OPENAI_API_KEY", ""):
+        if getattr(settings, "AI_ENABLED", False) and getattr(
+            settings, "OPENAI_API_KEY", ""
+        ):
             try:
                 # IMPORTANT:
                 # - integrations/openai 側はあなたが実装担当とのことなので
@@ -274,8 +292,9 @@ class QuestService:
                 # AIに渡す「最小で十分な情報」
                 # - 候補クエストはDBの固定データ（生成AI地獄を回避）
                 candidates = list(
-                    Quest.objects.filter(difficulty=difficulty, is_active=True)
-                    .only("id", "name", "difficulty", "category", "points", "description")
+                    Quest.objects.filter(difficulty=difficulty, is_active=True).only(
+                        "id", "name", "difficulty", "category", "points", "description"
+                    )
                 )
                 if len(candidates) < 4:
                     # 候補不足はロジックに落とす
@@ -299,16 +318,22 @@ class QuestService:
                 }
 
                 # AIは「idの配列」を返す想定（順序も含める）
-                result = client.generate_json(prompt=RECOMMEND_QUESTS_PROMPT, data=payload)
-                picked_ids = [int(x) for x in result.get("quest_ids", []) if str(x).isdigit()]
-                
+                result = client.generate_json(
+                    prompt=RECOMMEND_QUESTS_PROMPT, data=payload
+                )
+                picked_ids = [
+                    int(x) for x in result.get("quest_ids", []) if str(x).isdigit()
+                ]
+
                 # 4件に整える（足りなければロジック補完でもOKだが、まずは厳密に）
                 if len(picked_ids) < 4:
                     raise RuntimeError("AI returned insufficient quest ids")
 
                 picked = list(Quest.objects.filter(id__in=picked_ids, is_active=True))
                 picked_map = {q.id: q for q in picked}
-                ordered = [picked_map[qid] for qid in picked_ids if qid in picked_map][:4]
+                ordered = [picked_map[qid] for qid in picked_ids if qid in picked_map][
+                    :4
+                ]
 
                 if len(ordered) != 4:
                     raise RuntimeError("AI pick mismatch")
@@ -330,7 +355,9 @@ class QuestService:
         """
         qs = Quest.objects.filter(difficulty=difficulty, is_active=True)
         if qs.count() < 4:
-            raise ValidationError({"quest": "クエスト候補が不足しています（seedを投入してください）"})
+            raise ValidationError(
+                {"quest": "クエスト候補が不足しています（seedを投入してください）"}
+            )
 
         stretch = list(qs.filter(category=QuestCategory.STRETCH))
         muscle = list(qs.filter(category=QuestCategory.MUSCLE))
@@ -372,10 +399,9 @@ class QuestService:
         """
         # 1) daily_item を引く（teamも辿れるように）
         try:
-            item = (
-                DailyQuestItem.objects.select_related("daily_set", "quest", "daily_set__team")
-                .get(id=daily_item_id)
-            )
+            item = DailyQuestItem.objects.select_related(
+                "daily_set", "quest", "daily_set__team"
+            ).get(id=daily_item_id)
         except DailyQuestItem.DoesNotExist:
             raise ValidationError({"daily_item": "クエストが存在しません"})
 
@@ -388,12 +414,16 @@ class QuestService:
         # 3) 「今日のセット」以外は弾く（“日付変わればリセット”を厳密にする）
         today = timezone.localdate()
         if item.daily_set.date != today:
-            raise ValidationError({"date": "このクエストは今日のものではありません（更新してください）"})
+            raise ValidationError(
+                {"date": "このクエストは今日のものではありません（更新してください）"}
+            )
 
         # 4) 既に達成していたら “成功扱いで静かに戻す” のがUX良い
         #    UniqueConstraint で最終的に守られる
         try:
-            completion = QuestCompletion.objects.create(daily_item=item, user=user, completed_at=timezone.now())
+            completion = QuestCompletion.objects.create(
+                daily_item=item, user=user, completed_at=timezone.now()
+            )
         except IntegrityError:
             # 連打/二重達成
             # ただし、UIでは「Quest Clear!!」を出したいなら views 側で分岐するため
@@ -446,11 +476,13 @@ class QuestService:
             rank_before=rank_before,
             rank_after=rank_after,
         )
-    
+
     # ------------------------------------------------------------
     # Progress (today)
     # ------------------------------------------------------------
-    def get_today_progress(self, *, team: Team, user: "AbstractUser") -> TodayProgressResult:
+    def get_today_progress(
+        self, *, team: Team, user: "AbstractUser"
+    ) -> TodayProgressResult:
         self.assert_member(team_id=team.id, user=user)
         self.assert_unlocked(team=team)
 
@@ -476,7 +508,9 @@ class QuestService:
 
         # 自分が達成済みか
         my_done_ids = set(
-            QuestCompletion.objects.filter(daily_item__in=items, user=user).values_list("daily_item_id", flat=True)
+            QuestCompletion.objects.filter(daily_item__in=items, user=user).values_list(
+                "daily_item_id", flat=True
+            )
         )
 
         progress_items: list[ProgressItem] = []
@@ -491,7 +525,7 @@ class QuestService:
             )
 
         return TodayProgressResult(daily_set=today_set, items=progress_items)
-    
+
     # ------------------------------------------------------------
     # MVP (today)
     # ------------------------------------------------------------
@@ -515,11 +549,14 @@ class QuestService:
 
         top = qs.first()
         if not top:
-            return TodayMvpResult(user=None, total_points=0, first_completed_at=None, daily_set=today_set)
-        
+            return TodayMvpResult(
+                user=None, total_points=0, first_completed_at=None, daily_set=today_set
+            )
+
         # user取得（テンプレで表示できる形に）
         # ※ display_name を使う想定ならテンプレで getattr する
         from django.contrib.auth import get_user_model
+
         User = get_user_model()
         mvp_user = User.objects.filter(id=top["user_id"]).first()
 
