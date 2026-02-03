@@ -72,9 +72,43 @@
     margin-bottom: 20px;
 }
 
-/* レスポンシブ対応 */
+/* ✅ スマホ想定：横並びを維持しつつサイズ調整 */
 @media (max-width: 900px) {
-    .top-section {
-        grid-template-columns: 1fr;
-    }
+    .dashboard-container{
+    padding: 16px;
+    gap: 18px;
+}
+
+.top-section{
+    grid-template-columns: 148px 1fr; /* ←左を固定、右を可変 */
+    gap: 14px;
+    align-items: center;
+}
+
+  /* 左の灰ボックス（円グラフ）を小さく */
+.top-left-content{
+    padding: 14px;
+    border-radius: 18px;
+}
+
+  /* 右側（星 + MVP） */
+.top-right-column{
+    gap: 12px; /* 24→12 */
+}
+
+  /* 星の青ボックスも小さく */
+.top-right-upper{
+    padding: 12px;
+    border-radius: 18px;
+}
+
+  /* MVPは中のコンポーネントに依存するが、最低限の余白だけ整える */
+.top-right-lower{
+    min-height: 0;
+}
+
+  /* タイトル類をスマホ向けに */
+.team-name{
+    font-size: 28px;
+}
 }
