@@ -75,7 +75,18 @@ def dashboard_index_view(request):
         "daily_set": None,
         "difficulty": None,
         "generated_by": None,
+
+        # 未解放表示用
+        "quest_locked": False,
+        "quest_lock_reason": None,
     }
+
+    # 未解放なら service を呼ばずに、そのまま描画
+    # (assert_unlocked の ValidationError をそもそも発生させない)
+    if not getattr(team, "is_quest_unlocked", True):
+        context["quest_locked"] = True
+        context["quest_lock_reason"] = "クエストは2人以上で解放されます（仲間を招待してください）"
+        return render(request, "dashboard/index.html", context)
 
     try:
         # 1) 今日のセット
@@ -113,9 +124,19 @@ def dashboard_index_view(request):
         })
 
     except ValidationError as e:
-        _flash_validation_error(request, e, "ダッシュボードの一部を表示できませんでした。")
+        # ★ 追加：unlock のときは「画面内表示」に回す
+        md = getattr(e, "message_dict", None) or {}
+        if "unlock" in md:
+            val = md.get("unlock")
+            msg = val[0] if isinstance(val, (list, tuple)) and val else str(val)
+            context["quest_locked"] = True
+            context["quest_lock_reason"] = msg
+            # flash は好み。うるさければ消してOK
+            messages.info(request, msg)
+        else:
+            _flash_validation_error(request, e, "ダッシュボードの一部を表示できませんでした。")
+
     except Exception:
         messages.error(request, "ダッシュボードの読み込みに失敗しました。")
 
-    # ★ ここが重要：必ず dashboard を描画する
     return render(request, "dashboard/index.html", context)

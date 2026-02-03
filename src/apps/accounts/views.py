@@ -108,7 +108,7 @@ def logout_view(request):
     """
     # logout_view
     logout(request)
-    return redirect("/auth/login/")
+    return redirect("accounts:login")
 
 
 @require_GET
