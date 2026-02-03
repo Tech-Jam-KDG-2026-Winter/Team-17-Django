@@ -4,7 +4,6 @@
 	<div class="mvp-box">{{ mvp_name|default:"テス山" }}</div>
 </div> -->
 
-{% load static %}
 <div class="mvp-card-container">
     <div class="mvp-label">今日のMVP</div>
     
@@ -17,7 +16,7 @@
             </div>
             
             <div class="mvp-info">
-                <span class="mvp-name">{{ mvp.user.display_name|default:mvp.user.username }}</span>
+                <span class="mvp-name">{{ mvp.user.display_name|default:mvp.user.email }}</span>
                 <span class="mvp-points">{{ mvp.total_points }} pt</span>
             </div>
         </div>

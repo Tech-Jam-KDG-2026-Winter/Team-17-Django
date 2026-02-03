@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "apps.teams.apps.TeamsConfig",        
     "apps.quests.apps.QuestsConfig",
     "apps.notifications.apps.NotificationsConfig",
+    "apps.dashboard.apps.DashboardConfig",
 ]
 
 # --------------------------------------------------------------------
@@ -75,9 +76,9 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "accounts.User"
 
 # （任意）ログイン導線（Django標準のlogin_requiredなどが参照）
-LOGIN_URL = "/auth/login/"
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/auth/login/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 
 MIDDLEWARE = [

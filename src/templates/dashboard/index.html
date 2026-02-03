@@ -5,8 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>G-BASE Dashboard | {{ team.name }}</title>
     {% load static %}
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
     <link rel="stylesheet" href="{% static 'css/progress.css' %}">
+    <link rel="stylesheet" href="{% static 'css/progress_star.css' %}">
+    <link rel="stylesheet" href="{% static 'css/progress_bar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/quest_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/mvp.css' %}">
+    <link rel="stylesheet" href="{% static 'css/quests.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 <body class="dashboard-body">
 
@@ -20,15 +30,15 @@
 
         <section class="top-section">
             <div class="top-left-content">
-                {% include "partials/progress_bar.html" %}
+                {% include "dashboard/partials/progress_bar.html" %}
             </div>
 
             <div class="top-right-column">
                 <div class="top-right-upper">
-                    {% include "partials/progress_star.html" %}
+                    {% include "dashboard/partials/progress_star.html" %}
                 </div>
                 <div class="top-right-lower">
-                    {% include "partials/mvp.html" %}
+                    {% include "dashboard/partials/mvp.html" %}
                 </div>
             </div>
         </section>
@@ -36,7 +46,7 @@
         <section class="bottom-section">
             <h2 class="section-title">>>DailyQuest</h2>
             <div class="quest-board-wrapper">
-                {% include "partials/today_card.html" %}
+                {% include "dashboard/partials/today_card.html" %}
             </div>
         </section>
 

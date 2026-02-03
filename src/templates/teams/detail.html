@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/team_detail.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 <body>
 
@@ -43,25 +48,25 @@
             {% if members|length < team.max_members %}
             <div class="actions">
                 <!-- 本当は invite modal を開くボタンにするのが自然 -->
-                <button type="button" class="btn-add" onclick="openModal()">Add Member</button>
+                <button type="button" class="btn-add">招待コード: <strong>{{ invite.code }}</button>
             </div>
         {% endif %}
     </section>
 
     {# 招待コード表示（inviteが無い場合もあるのでガード） #}
     {% if invite and invite.is_active %}
-        <section class="invite">
-            <p>招待コード: <strong>{{ invite.code }}</strong></p>
+        <section class="actions">
             {% if request.user.id == team.owner_id %}
                 <form method="post" action="{% url 'teams:invite_regenerate' team.id %}">
                     {% csrf_token %}
-                    <button type="submit">招待コードを再生成</button>
+                    <button type="submit" class="btn-add">招待コードを再生成</button>
                 </form>
 
-                <form method="post" action="{% url 'teams:invite_deactivate' team.id %}">
+            <!---今回は無効化をコメントアウトしておく--->
+            <!----<form method="post" action="{% url 'teams:invite_deactivate' team.id %}">
                     {% csrf_token %}
                     <button type="submit">招待コードを無効化</button>
-                </form>
+                </form>-->    
             {% endif %}
         </section>
     {% endif %}

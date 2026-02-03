@@ -23,6 +23,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.http import require_POST
+from django.utils.http import url_has_allowed_host_and_scheme
 from apps.teams.models import Team
 from .services import QuestService
 
@@ -169,14 +170,17 @@ def complete_view(request, daily_item_id: int):
                 )
         else:
             messages.info(request, "このクエストは達成済みです。")
-        return redirect("quests:today")
 
     except ValidationError as e:
         _flash_validation_error(request, e, "達成できませんでした。")
-        return redirect("quests:today")
+        
     except Exception:
         messages.error(request, "予期しないエラーが発生しました。")
-        return redirect("quests:today")
+    
+    next_url = request.POST.get("next")
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
+    return redirect("quests:today")
 
 
 @login_required
