@@ -1,7 +1,7 @@
 .mvp-card-container {
-    background: #4682b4;
     border-radius: 16px;
-    padding: 20px;
+    padding: 16px;
+    margin-left: 16px;
     text-align: center;
     color: white;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
