@@ -29,8 +29,8 @@
                         {% with is_leader=True %}
                             <li class="member-item leader">
                                 <div class="member-info">
-                                    <img src="{% static 'images/leader_icon.png' %}" alt="Leader" class="leader-badge">
-                                    <span class="member-name">{{ member.user.display_name }}</span>
+                                    <i class="fa-solid fa-trophy notification-icon"></i>
+                                    <span class="owner-name">{{ member.user.display_name }}</span>
                                 </div>
                             </li>
                         {% endwith %}
@@ -47,13 +47,33 @@
 
             {% if members|length < team.max_members %}
             <div class="actions">
-                <!-- 本当は invite modal を開くボタンにするのが自然 -->
-                <button type="button" class="btn-add">招待コード: <strong>{{ invite.code }}</button>
+                <button type="button" class="btn-add" id="openInviteModal">
+                    招待コードを表示
+                </button>
             </div>
         {% endif %}
     </section>
 
-    {# 招待コード表示（inviteが無い場合もあるのでガード） #}
+    {% if invite and invite.is_active %}
+    <div id="inviteModal" class="modal" aria-hidden="true">
+
+        <div class="modal-panel" role="dialog" aria-modal="true" aria-label="招待コード">
+
+            <button type="button" class="modal-close" id="closeInviteModal" aria-label="閉じる">×</button>
+            
+            <div class="modal-title">招待コード</div>
+            
+            <div class="invite-row">
+                <div class="invite-code-text" id="inviteCodeText">{{ invite.code }}</div>
+                <button type="button" class="copy-btn" id="copyInviteCode" aria-label="コピー">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
     {% if invite and invite.is_active %}
         <section class="actions">
             {% if request.user.id == team.owner_id %}
@@ -61,12 +81,6 @@
                     {% csrf_token %}
                     <button type="submit" class="btn-add">招待コードを再生成</button>
                 </form>
-
-            <!---今回は無効化をコメントアウトしておく--->
-            <!----<form method="post" action="{% url 'teams:invite_deactivate' team.id %}">
-                    {% csrf_token %}
-                    <button type="submit">招待コードを無効化</button>
-                </form>-->    
             {% endif %}
         </section>
     {% endif %}
@@ -83,31 +97,58 @@
         
     </main>
 
-    <!-- 以下モーダル -->
-    <!-- <div id="inviteModal" class="modal">
-        <div class="modal-content">
-            <h3>Invite Code</h3>
-            <p class="invite-code">{{ invite.code }}</p>
-            <p class="invite-info">このコードをメンバーに共有してください。</p>
-            <button class="btn-close" onclick="closeModal()">Close</button>
-        </div>
-    </div> -->
-
     {% include "components/footer.html" %}
 
-    <!-- <script>
-        function openModal() {
-            document.getElementById('inviteModal').style.display = 'flex';
-        }
-        function closeModal() {
-            document.getElementById('inviteModal').style.display = 'none';
-        }
-        window.onclick = function(event) {
-            const modal = document.getElementById('inviteModal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-    </script> -->
+    <script>
+(function () {
+    const modal = document.getElementById('inviteModal');
+    const openBtn = document.getElementById('openInviteModal');
+    const closeBtn = document.getElementById('closeInviteModal');
+    const copyBtn = document.getElementById('copyInviteCode');
+    const codeEl = document.getElementById('inviteCodeText');
+
+    if (!modal || !openBtn) return;
+
+    function openModal() {
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn && closeBtn.addEventListener('click', closeModal);
+
+    // 背景クリックで閉じる（パネル外）
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // ESCで閉じる
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // コピー
+    copyBtn && copyBtn.addEventListener('click', async () => {
+        try {
+        const text = codeEl ? codeEl.textContent.trim() : '';
+        await navigator.clipboard.writeText(text);
+        copyBtn.classList.add('copied');
+        setTimeout(() => copyBtn.classList.remove('copied'), 700);
+    } catch (err) {
+        // クリップボードが使えない環境向けフォールバック
+        const text = codeEl ? codeEl.textContent.trim() : '';
+        window.prompt('コピーできない場合は手動でコピーしてください:', text);
+    }
+    });
+})();
+</script>
+
 </body>
 </html>

@@ -1,14 +1,14 @@
 .mvp-card-container {
-    background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
     border-radius: 16px;
-    padding: 20px;
+    padding: 16px;
+    margin-left: 16px;
     text-align: center;
     color: white;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .mvp-label {
-    font-size: 12px;
+    font-size: 20px;
     font-weight: 900;
     letter-spacing: 0.1em;
     margin-bottom: 12px;

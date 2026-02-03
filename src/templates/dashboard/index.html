@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/progress.css' %}">
     <link rel="stylesheet" href="{% static 'css/progress_star.css' %}">
     <link rel="stylesheet" href="{% static 'css/progress_bar.css' %}">
-    <link rel="stylesheet" href="{% static 'css/quest_card.css' %}">
+    <link rel="stylesheet" href="{% static 'css/today_card.css' %}">
     <link rel="stylesheet" href="{% static 'css/mvp.css' %}">
     <link rel="stylesheet" href="{% static 'css/quests.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
@@ -33,11 +33,12 @@
                 {% include "dashboard/partials/progress_bar.html" %}
             </div>
 
-            <div class="top-right-column">
-                <div class="top-right-upper">
+            <div class="top-right-card">
+                <div class="top-right-progress">
                     {% include "dashboard/partials/progress_star.html" %}
                 </div>
-                <div class="top-right-lower">
+    
+                <div class="top-right-mvp">
                     {% include "dashboard/partials/mvp.html" %}
                 </div>
             </div>

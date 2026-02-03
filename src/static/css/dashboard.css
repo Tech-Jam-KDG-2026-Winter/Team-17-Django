@@ -1,7 +1,7 @@
 /* 基本設定 */
 .dashboard-body {
     margin: 0;
-    background-color: #f8fafc;
+    background-color: #1a2233;
     min-height: 100vh;
 }
 
@@ -11,56 +11,62 @@
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 12px;
 }
 
 /* チーム名 */
 .team-name {
-    font-size: 28px;
+    font-size: 36px;
     font-weight: 900;
-    color: #4f46e5;
+    color: #fff;
     margin: 0;
+    padding-left:12px;
 }
 
 /* 上部レイアウト（左：グラフ、右：星・MVP） */
-.top-section {
+/* 上部：左（円）+ 右（情報） */
+.top-section{
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 左右均等分割 */
-    gap: 24px;
+    grid-template-columns: 148px 1fr;
+    gap: 14px;
+    align-items: center;
 }
 
-/* 左側ボックス */
-.top-left-content {
-    background: white;
-    border-radius: 24px;
-    padding: 40px;
+/* 左（円）の箱は今のままでOK（スマホ用に小さめ） */
+.top-left-content{
+    border-radius: 18px;
+    padding: 14px;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* 右側カラム */
-.top-right-column {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+/* ★右側を1枚のカードに統合 */
+.top-right-card{
+    background: #1f2b3f;            /* 理想の濃紺寄せ（青より落ち着く） */
+    border-radius: 18px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-rows: auto auto;
+    gap: 10px;
 }
 
-/* 右上：星型進捗の背景 */
-.top-right-upper {
-    background: #4f46e5;
-    border-radius: 24px;
-    padding: 24px;
+/* 星ブロック */
+.top-right-progress{
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* 右下：MVP（カード自体のデザインはmvp.htmlに準拠） */
-.top-right-lower {
-    flex-grow: 1;
+/* MVPブロック */
+.top-right-mvp{
+    display: flex;
+    align-items: center;
+}
+
+/* タイトル類（スマホ寄せ） */
+.team-name{
+    font-size: 28px;
 }
 
 /* 下部セクション */
@@ -71,9 +77,47 @@
     margin-bottom: 20px;
 }
 
-/* レスポンシブ対応 */
+/* ✅ スマホ想定：横並びを維持しつつサイズ調整 */
 @media (max-width: 900px) {
-    .top-section {
-        grid-template-columns: 1fr;
-    }
+    .dashboard-container{
+    padding-top: 10px;
+    gap: 12px;
+}
+
+.top-section{
+    grid-template-columns: 148px 1fr; /* ←左を固定、右を可変 */
+    gap: 14px;
+    align-items: center;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+  /* 左の灰ボックス（円グラフ）を小さく */
+.top-left-content{
+    padding: 14px;
+    border-radius: 18px;
+}
+
+  /* 右側（星 + MVP） */
+.top-right-column{
+    gap: 12px; /* 24→12 */
+}
+
+  /* 星の青ボックスも小さく */
+.top-right-upper{
+    padding: 12px;
+    border-radius: 18px;
+}
+
+  /* MVPは中のコンポーネントに依存するが、最低限の余白だけ整える */
+.top-right-lower{
+    min-height: 0;
+}
+
+  /* タイトル類をスマホ向けに */
+.team-name{
+    margin: 0;
+    font-size: 36px;
+    margin-bottom: -24px !important;
+}
 }
