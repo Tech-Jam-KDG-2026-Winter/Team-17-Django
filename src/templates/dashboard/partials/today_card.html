@@ -36,6 +36,7 @@
         {% else %}
         <form action="{% url 'quests:complete' item.id %}" method="POST">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
                 <button type="submit" class="btn-complete-circle">✓</button>    
         </form>
         {% endif %}

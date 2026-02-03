@@ -48,7 +48,7 @@
             {% if members|length < team.max_members %}
             <div class="actions">
                 <!-- 本当は invite modal を開くボタンにするのが自然 -->
-                <button type="button" class="btn-add" onclick="openModal()">Add Member</button>
+                <button type="button" class="btn-add">招待コード: <strong>{{ invite.code }}</button>
             </div>
         {% endif %}
     </section>
@@ -56,7 +56,6 @@
     {# 招待コード表示（inviteが無い場合もあるのでガード） #}
     {% if invite and invite.is_active %}
         <section class="invite">
-            <p>招待コード: <strong>{{ invite.code }}</strong></p>
             {% if request.user.id == team.owner_id %}
                 <form method="post" action="{% url 'teams:invite_regenerate' team.id %}">
                     {% csrf_token %}

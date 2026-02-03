@@ -83,6 +83,11 @@ class TodayMvpResult:
     first_completed_at: timezone.datetime | None
     daily_set: DailyQuestSet | None
 
+@dataclass(frozen=True)
+class TodayActivitySummary:
+    active_member_count: int  # 今日動いた人数（ユニーク）
+    max_members: int          # 表示上の最大（固定5でOK）
+
 
 class QuestService:
     """
@@ -565,4 +570,25 @@ class QuestService:
             total_points=int(top["total_points"] or 0),
             first_completed_at=top["first_completed_at"],
             daily_set=today_set,
+        )
+    
+    def get_today_activity_summary(self, *, team: Team, user: "AbstractUser") -> TodayActivitySummary:
+        self.assert_member(team_id=team.id, user=user)
+        self.assert_unlocked(team=team)
+
+        today_set = self.get_or_create_today_set(team=team, user=user).daily_set
+
+        # 今日のセット内で、1つでも達成したユーザーをユニークカウント
+        active_count = (
+            QuestCompletion.objects
+            .filter(daily_item__daily_set=today_set)
+            .values("user_id")
+            .distinct()
+            .count()
+        )
+
+        # 星は最大5固定（要件）
+        return TodayActivitySummary(
+            active_member_count=min(int(active_count), 5),
+            max_members=5,
         )
