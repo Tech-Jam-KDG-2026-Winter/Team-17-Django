@@ -21,7 +21,7 @@
 
 /* difficulty colors */
 .quest-card.easy    { background: rgba(20, 200, 90, 1.45); }
-.quest-card.normal { background: rgba(250, 240, 0, 1.45); }
+.quest-card.normal { background:  rgba(250, 240, 0, 1.45);}
 .quest-card.hard  { background: rgba(220, 20, 80, 1.48); }
 
 /* ===== content ===== */

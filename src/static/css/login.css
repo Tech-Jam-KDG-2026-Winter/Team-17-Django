@@ -11,36 +11,42 @@ body {
 	color: #ffffff;
 }
 
-.login-wrapper {
-	width: 280px; /* 画像の比率に合わせた幅 */
-	text-align: center;
+/* ===== Header Only ===== */
+
+.header {
+	background-color: #0b1626;
+	border-bottom: 1px solid #1e2a3a;
+	padding: 12px 16px;
 }
 
-/* ロゴセクション */
-.header-logo {
+.header-inner {
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	margin-bottom: 50px;
-	gap: 12px;
+	gap: 10px;
 }
 
-.pentagon-icon {
-	width: 48px;
-	height: 48px;
-	background-color: transparent;
-	border: 3px solid #F7FF78; /* ロゴの薄黄色 */
-	clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+.logo-image {
+	height: 32px;     /* ← スマホ基準 */
+	width: auto;      /* 縦基準で比率維持 */
+	display: block;
 }
 
-.brand-name {
-	background-color: #F7FF78;
-	color: #1e2736;
-	font-size: 42px;
-	font-weight: 900;
-	padding: 2px 10px;
-	letter-spacing: 1px;
+/* ===== Tablet & Large Smartphone (max-width: 767px) ===== */
+@media screen and (max-width: 767px) {
+	.header {
+		padding: 12px 14px;
+	}
+
+	.header-inner {
+		gap: 9px;
+	}
+
+	.logo-image{
+		height: 44px;
+	}
 }
+
+
 
 /* フォーム要素 */
 .page-title {
