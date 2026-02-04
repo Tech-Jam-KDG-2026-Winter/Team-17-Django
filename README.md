@@ -515,7 +515,7 @@ erDiagram
 
 ---
 
-## ディレクトリ構成（Backend）
+## ディレクトリ構成
 
 ```text
 src/
