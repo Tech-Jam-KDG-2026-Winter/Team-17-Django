@@ -9,11 +9,14 @@
 </head>
 <body>
     <div class="login-wrapper">
-        <div class="header-logo">
-            <div class="pentagon-icon"></div>
-            <div class="brand-name">G-BASE</div>
-        </div>
+        <div class="header-inner">
 
+		<img
+		src="{% static 'images/g-base_logo.png' %}"
+		alt="G-BASE logo"
+		class="logo-image"
+		/>
+	</div>
         <form method="POST" action="{% url 'accounts:login' %}" class="form-container">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.GET.next }}">
