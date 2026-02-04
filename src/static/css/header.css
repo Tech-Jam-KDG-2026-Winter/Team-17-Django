@@ -18,19 +18,10 @@ body {
 	gap: 10px;
 }
 
-.logo-icon {
-	width: 28px;
-	height: 28px;
-	border: 3px solid #e6f26a;
-	clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-}
-
-.logo-text {
-	background-color: #e6f26a;
-	color: #0b1626;
-	font-weight: bold;
-	padding: 6px 10px;
-	letter-spacing: 1px;
+.logo-image {
+	height: 32px;     /* ← スマホ基準 */
+	width: auto;      /* 縦基準で比率維持 */
+	display: block;
 }
 
 /* ===== Tablet & Large Smartphone (max-width: 767px) ===== */
@@ -43,15 +34,7 @@ body {
 		gap: 9px;
 	}
 
-	.logo-icon {
-		width: 26px;
-		height: 26px;
-		border-width: 3px;
-	}
-
-	.logo-text {
-		font-size: 15px;
-		padding: 5px 9px;
-		letter-spacing: 0.8px;
+	.logo-image{
+		height: 28px;
 	}
 }

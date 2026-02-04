@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path, include
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -33,3 +35,6 @@ urlpatterns = [
     # accounts
     path("accounts/", include("apps.accounts.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
